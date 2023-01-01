@@ -1,6 +1,6 @@
 # BASE
 NO SQL PHP datafiles
-
+<pre>
 What is BASE?
 BASE is a format data file management system (.php).
 
@@ -31,3 +31,4 @@ $data[1][1][3]='donald';
 $data[1][2][1]='2';
 $data[1][2][2]='obama';
 $data[1][2][3]='barack';
+</pre>

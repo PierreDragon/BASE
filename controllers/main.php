@@ -1,8 +1,8 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Main
-* @version:	1.1 (main.php)
-* @author: Pierre Martin
+* @version: 1.1 (main.php)
+* @author: webiciel.ca
 * @php: 7.4
 * @revision: 2021-01-20
 * @licence MIT

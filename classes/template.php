@@ -1,8 +1,8 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	8.9
-* @author: pierre.martin@live.ca
+* @version: 8.9
+* @author: webiciel.ca
 * @php: 7.4
 * @revision: 2022-12-30 15:00
 * @Ajouter la capture de fichier view inexistant 

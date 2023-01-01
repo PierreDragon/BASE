@@ -1,0 +1,26 @@
+/* Tuto Alsacreations : Faites bonne impression - Feuille styles css imprimante */
+
+body { /* Modifications : la couleur de fond de page - la police - l'unitÃ© utilisÃ©e pour la taille de la police  */
+	background-color:#fff;
+	font-family:Serif;
+	font-size:14pt;
+}
+table {
+    border:solid #000 !important;
+    border-width:1px 0 0 1px !important;
+}
+th, td {
+    border:solid #000 !important;
+    border-width:0 1px 1px 0 !important;
+}
+h5, hr, a, blockquote{
+	display:none;
+}
+#navigation, #menuleft, #msg, #footer, #exec, #myInput 
+{ 
+	display:none;
+}
+#copyright
+{
+	display:block;
+}

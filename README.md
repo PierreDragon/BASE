@@ -37,3 +37,4 @@ $data[1][2][3]='barack';
 ## TUTORIAL
 <p>All you have to do is put all the folders and files on a server with php. (> php7)<p>
 <p>You can login with demo user and demo password. Then the demo.php file will be used for the data or you can also log in with the user admin password admin and therefore the data file used will be admin.php.</p>
+<p>Only the admin user can access the system database.</p>

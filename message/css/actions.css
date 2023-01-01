@@ -1,0 +1,17 @@
+/*Fields of table: actions
+1 id_action
+2 action
+3 strtable
+4 strfield
+5 totable
+6 tofield
+7 left
+8 right
+9 string
+10 operator
+11 value
+12 unique */
+#strtable,#strfield,#totable,#tofield,#operator,#left,#right,#string,#value,#unique
+{
+	display:none;
+}

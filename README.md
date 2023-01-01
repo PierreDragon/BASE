@@ -1,5 +1,6 @@
 # BASE
 NO SQL PHP datafiles
+
 <pre>
 What is BASE?
 BASE is a format data file management system (.php).
@@ -32,3 +33,6 @@ $data[1][2][1]='2';
 $data[1][2][2]='obama';
 $data[1][2][3]='barack';
 </pre>
+
+## TUTORIAL
+<p>All you have to do is put all the folders and files on a server with php. (> php7)<p>

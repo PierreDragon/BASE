@@ -2,7 +2,7 @@
 /**
 * @class: Controller
 * @version:	8.9
-* @author: pierre.martin@live.ca
+* @author: webiciel.ca
 * @php: 7.4
 * @revision: 2022-12-30 15:00
 * @Changer class Get our DB

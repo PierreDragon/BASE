@@ -1,8 +1,8 @@
 <?php 
 /**
 * @class: Get
-* @version:	8.1
-* @author: pierre.martin@live.ca
+* @version: 8.1
+* @author: info@webiciel.ca
 * @php: 7.4
 * @revision: 2022-12-29 10:00
 * @note: retrait de tout ce qui concerne mysql

@@ -2,7 +2,7 @@
 /**
 * @class: Model
 * @version: 7.4.5
-* @author: pierre.martin@live.ca
+* @author: info@webiciel.ca
 * @php: 7.4
 * @revision: 2022-12-31 21:40
 * @note :  optimization

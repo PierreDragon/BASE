@@ -2,7 +2,7 @@
 /**
 * @class: Model
 * @version: 7.4.5
-* @author: webiciel.ca
+* @author: pierre.martin@live.ca
 * @php: 7.4
 * @revision: 2022-12-31 21:40
 * @note :  optimization
@@ -685,7 +685,7 @@ class Model
 	{
 		if(empty($post['table']) || empty($mandatory))
 		{
-			$msg = 'Bienvenue';
+			$msg = 'Add a new line';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new Exception($msg);
 		}

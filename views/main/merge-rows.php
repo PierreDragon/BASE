@@ -23,4 +23,4 @@
 <hr>
 <h5>TIP : To accomplish this task, you need a commun keys for many rows, a column dedicate to the number of a line and a column to receive the concated text 
 from all matching rows into one single cell of the first row.</h5>
-<img src="<?=ASSETDIRECTORY?>/img/mergerows.png">
+<img src="<?=ASSETDIRECTORY.$path?>img/mergerows.png">

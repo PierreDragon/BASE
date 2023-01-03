@@ -4,7 +4,7 @@
 	<?php echo (isset($head))? $head:'$head'; ?>
 </head>
   <body style="overflow-y:scroll;">
-	<div id="page" class="container-fluid">
+  <div id="page" class="container-fluid">
 		<div class="row-fluid">
 			<div id="banner" class="col-md-12">
 				<?php 

@@ -2,8 +2,8 @@
 <div class="panel panel-default">
   <div class="panel-heading">
 	  <h6>Main <span class="badge"> <?=VERSION?> </span></h6>
-	  <h6>Controller <span class="badge"> <?=Controller::$version?> </span></h6>
-	  <h6>Model <span class="badge"> <?=Model::$version?> </span></h6>
+	  <h6>Controller <span class="badge"> <?=Core\Controller::$version?> </span></h6>
+	  <h6>Model <span class="badge"> <?=Core\Model::$version?> </span></h6>
 	  <h6>PHP Version  <span class="badge"><?php echo phpversion(); ?></span></h6>
   </div>
 	<div class="panel-body">	

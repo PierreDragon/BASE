@@ -1,13 +1,13 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Message
-* @version: 7.2
-* @author: webiciel.ca
+* @version: 7.2 
+* @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2021-01-16
+* @revision: 2023-01-01
 * @licence MIT
 */
-class Message extends Controller
+class Message extends Core\Controller
 {
 	function __construct()
 	{
@@ -72,7 +72,7 @@ class Message extends Controller
 	function empty_table($url)
 	{	
 		$strTable=$url[TABLE];
-		$this->DB->empty_table($this->DB->get_id_table($strTable));
+		$this->DB->empty_table($this->DB->id_table($strTable));
 		header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 	}
 }

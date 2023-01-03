@@ -1,13 +1,13 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: System
-* @version: 7.3
-* @author: webiciel.ca
+* @version: 7.2 
+* @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2022-11-13 12:35
+* @revision: 2023-01-01
 * @licence MIT
 */
-class System extends Controller
+class System extends Core\Controller
 {
 	function __construct()
 	{
@@ -53,13 +53,13 @@ class System extends Controller
 		$this->data['legend'] = "Renumber a column of the table: $strTable" ;
 		$this->data['placeholder'] = 'Renumber a column';
 		
-		//$this->data['columns'] = $this->DB->get_columns_of('actions');
+		//$this->data['columns'] = $this->DB->columns('actions');
 		$this->data['columns'] = array(1=>'strfield',2=>'value');
 		
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Column to be renumbered');	
 		$this->data['divvalue'] = $this->Template->makediv('value','start',' : Beginning value');	
 	
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/renumber_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('renumber-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -85,7 +85,7 @@ class System extends Controller
 		$this->properties('left',$strTable);
 		
 		//CONTENTS
-		$this->data['columns'] = $this->DB->get_columns_of($strTable);
+		$this->data['columns'] = $this->DB->columns($strTable);
 
 		if(isset($url[FIELD]))
 		{
@@ -103,15 +103,15 @@ class System extends Controller
 				$i = 0;
 				foreach($t as $k=>$value)
 				{
-					$table = $this->DB->get_id_table($strTable);
-					$col = $this->DB->get_column_name($table,$k);
+					$table = $this->DB->id_table($strTable);
+					$col = $this->DB->column_name($table,$k);
 					if(substr($col, -3, 1)=="_")
 					{
 						$strForeignTable = stristr($col, '_', true).'s';
 						$col = stristr($col, '_', true);
 
 						$rec = $this->DB->get_where_unique($strForeignTable,'id_'.$col,$value);
-						$intForeignTable = $this->DB->get_id_table($strForeignTable);
+						$intForeignTable = $this->DB->id_table($strForeignTable);
 						$tbody .= '<td>';
 						if($rec)
 						{
@@ -223,11 +223,11 @@ class System extends Controller
 	/*function add_record($url)
 	{
 		$this->denied('add a record');
-	}*/
+	}
 	function edit_record($url)
 	{
 		$this->denied('edit a record');
-	}
+	}*/
 	function delete_record($url)
 	{
 		if( ($url[TABLE]=='users' || $url[TABLE]=='scripts' || $url[TABLE]=='operators'  || $url[TABLE]=='rwords' || $url[TABLE]=='configs') && $_SESSION['id_user'] !== "1" )
@@ -238,7 +238,7 @@ class System extends Controller
 		{
 			if($url[TABLE]=='files')
 			{
-				$rec = $this->DB->get_record($url[TABLE],$url[INDEX]);
+				$rec = $this->DB->record($url[TABLE],$url[INDEX]);
 				if(file_exists(DATADIRECTORY.$rec['file']))
 				{
 					unlink(DATADIRECTORY.$rec['file']);

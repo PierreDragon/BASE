@@ -1,16 +1,20 @@
-<?php if ( ! defined('ROOT')) exit('No direct script access allowed');
+<?php 
+namespace Core;
+
+if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	8.9
-* @author: webiciel.ca
+* @version:	9.0
+* @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2022-12-30 15:00
-* @Changer class Get our DB
+* @revision: 2023-01-03 11:30
+* @add the namespace
+* @change Throwable for \Exception
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '8.9';
+	public static $version = '9.0';
 	protected $data = array();
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
 	function __construct($file,$ext,$path=NULL)
@@ -33,20 +37,20 @@ class Controller
 			$this->DB->connect(DATADIRECTORY,$file,$ext);
 		}
 		//Delete doublon in sys files table
-		$table = $this->Sys->get_id_table('files');
-		$column = $this->Sys->get_id_column($table,'file');
+		$table = $this->Sys->id_table('files');
+		$column = $this->Sys->id_column($table,'file');
 		$this->Sys->del_doublon($table,$column);
 		//Delete doublon in sys table tables
-		$table = $this->Sys->get_id_table('tables');
-		$column = $this->Sys->get_id_column($table,'strtable');
+		$table = $this->Sys->id_table('tables');
+		$column = $this->Sys->id_column($table,'strtable');
 		$this->Sys->del_doublon($table,$column);
 		
 		$configs=$this->Sys->table('configs');
-		//model public function get_id_table($table,$strColumn)
-		$table=$this->Sys->get_id_table('configs');
-		//model  public function get_id_column($table,$strColumn)
-		$key=$this->Sys->get_id_column($table,'key');
-		$value=$this->Sys->get_id_column($table,'value');
+		//model public function id_table($table,$strColumn)
+		$table=$this->Sys->id_table('configs');
+		//model  public function id_column($table,$strColumn)
+		$key=$this->Sys->id_column($table,'key');
+		$value=$this->Sys->id_column($table,'value');
 		// $rec[2] == key $rec[3]== value
 		foreach($configs as $i=>$rec)
 		{
@@ -70,7 +74,7 @@ class Controller
 		// MESSAGE
 		$this->get_message();
 		// LEFT
-		$this->data['tables'] = $this->DB->get_tables();
+		$this->data['tables'] = $this->DB->tables();
 		$this->data['left'] = $this->Template->load('left',$this->data,TRUE);
 		// FOOTER
 		$this->data['footer'] = $this->Template->load('footer', $this->data,TRUE);
@@ -79,7 +83,7 @@ class Controller
 		{
 			$this->DB->check_system();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -106,8 +110,8 @@ class Controller
 			if($this->DB->add_table($strTable))
 			{
 				//For system tables list
-				$last = $this->Sys->get_last('tables');
-				$idtab = $this->Sys->get_id_table('tables');
+				$last = $this->Sys->last('tables');
+				$idtab = $this->Sys->id_table('tables');
 				$post['table'] = $idtab;
 				$post['id_table'] = $last+1;
 				$post['strtable'] = $strTable;
@@ -118,7 +122,7 @@ class Controller
 				exit;
 			}
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -137,15 +141,15 @@ class Controller
 		//$this->properties('left',$url[TABLE]);
 		try
 		{
-			$id_table = $this->DB->get_id_table($url[TABLE]);
-			$strTableName = $this->DB->get_table_name($id_table);
+			$id_table = $this->DB->id_table($url[TABLE]);
+			$strTableName = $this->DB->table_name($id_table);
 			$strTable = @strtolower($_POST['newname']);
 			$strTable = $this->DB->remove_accents($strTable);
 			if($this->DB->edit_table($id_table,$strTable))
 			{
 				//For tables list
-				$idtab = $this->Sys->get_id_table('tables');
-				$line = $this->Sys->get_real_id($idtab,'strtable',$strTableName);
+				$idtab = $this->Sys->id_table('tables');
+				$line = $this->Sys->real_id($idtab,'strtable',$strTableName);
 				$post = ['table' => $idtab,'line' => $line,'id_table'=>$id_table, 'strtable'=>$strTable];
 				$this->Sys->set_line($post);
 
@@ -154,18 +158,17 @@ class Controller
 				exit;
 			}
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
 		$this->get_message();
 		$this->data['legend'] = 'Rename the table '.$url[TABLE] ;
 		//data-toggle="tooltip"
-		$this->data['tip'] = 'When you add or rename a table, it will be added to the table [tables] from system.
-		Rename table are automatically lowercase.';
+		$this->data['tip'] = 'When you add or rename a table, it will be added to the table [tables] from system. Rename table are automatically lowercase.';
 		$this->data['placeholder'] = 'New name for table';
 		$this->data['name'] = 'newname';
-		//$this->data['value'] = $strTable;
+		$this->data['value'] = $strTable;
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/edit_table/'.$url[TABLE];
 		$this->data['content'] = $this->Template->load('edit', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -180,19 +183,19 @@ class Controller
 				$answer = @$_POST['inlineRadioOptions'];
 				if(!isset($answer) && isset($strTable))
 				{
-					$tab = $this->DB->get_id_table($strTable);
+					$tab = $this->DB->id_table($strTable);
 					$refaction = WEBROOT.strtolower(get_class($this)).'/delete_table/'.$url[TABLE];
 					$this->question('Are you sure you want to delete table '.$this->colorize($url[TABLE],'red').' ?',$refaction,$tab);
 					exit;
 				}
 				elseif($answer == 'yes')
 				{
-					$this->DB->delete_table($this->DB->get_id_table($strTable));
+					$this->DB->delete_table($this->DB->id_table($strTable));
 					$this->Sys->del_lines_where('tables','strtable','==',$strTable,'id_table');
 					$this->Msg->set_msg("You have deleted the table: $strTable");
 				}
 			}
-			catch (Throwable $t)
+			catch (\Exception $t)
 			{
 				$this->Msg->set_msg($t->getMessage());
 			}
@@ -209,18 +212,18 @@ class Controller
 				$answer = @$_POST['inlineRadioOptions'];
 				if(!isset($answer) && isset($strTable))
 				{
-					$tab = $this->DB->get_id_table($strTable);
+					$tab = $this->DB->id_table($strTable);
 					$refaction = WEBROOT.strtolower(get_class($this)).'/empty_table/'.$url[TABLE];
 					$this->question('Are you sure you want to empty table '.$this->colorize($url[TABLE],'red').' ?',$refaction,$tab);
 					exit;
 				}
 				elseif($answer == 'yes')
 				{
-					$this->DB->empty_table($this->DB->get_id_table($strTable));
+					$this->DB->empty_table($this->DB->id_table($strTable));
 					$this->Msg->set_msg("You empty the table: $strTable");
 				}
 			}
-			catch (Throwable $t)
+			catch (\Exception $t)
 			{
 				$this->Msg->set_msg($t->getMessage());
 			}
@@ -283,7 +286,7 @@ class Controller
 		$this->properties('left',$strTable);
 
 		//CONTENTS
-		$this->data['columns'] = $this->DB->get_columns_of($strTable);
+		$this->data['columns'] = $this->DB->columns($strTable);
 
 		if(isset($url[FIELD]) && ! is_numeric($url[FIELD]))
 		{
@@ -312,15 +315,15 @@ class Controller
 				$i = 0;
 				foreach($t as $k=>$value)
 				{
-					$table = $this->DB->get_id_table($strTable);
-					$col = $this->DB->get_column_name($table,$k);
+					$table = $this->DB->id_table($strTable);
+					$col = $this->DB->column_name($table,$k);
 					if(substr($col, -3, 3)=="_id")
 					{
 						$strForeignTable = stristr($col, '_', true).'s';
 						$col = stristr($col, '_', true);
 						try
 						{
-							$rec = $this->DB->get_where_unique($strForeignTable,'id_'.$col,$value);
+							$rec = $this->DB->where_unique($strForeignTable,'id_'.$col,$value);
 
 							$tbody .= '<td>';
 							if($rec)
@@ -333,7 +336,7 @@ class Controller
 							}
 							$tbody .= '</td>';
 						}
-						catch (Throwable $t)
+						catch (\Exception $t)
 						{
 							$this->Msg->set_msg($t->getMessage());
 						}
@@ -346,7 +349,7 @@ class Controller
 							$str = $arr[1].'s';
 							try
 							{
-								$records =$this->DB->get_where('rules','master','==',$str);
+								$records =$this->DB->where('rules','master','==',$str);
 								if($records)
 								{
 									$a = '<span>'.$value.' </span>';
@@ -367,7 +370,7 @@ class Controller
 									$tbody .= '<td id="td'.$key.'" style="text-decoration:underline;">'.$value.'</td>';
 								}
 							}
-							catch (Throwable $t)
+							catch (\Exception $t)
 							{
 								$this->Msg->set_msg($t->getMessage());
 							}
@@ -448,7 +451,7 @@ class Controller
 				exit;
 			}
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -466,7 +469,7 @@ class Controller
 		$strTable = $url[TABLE];
 		$intColumn = $url[FIELD];
 
-		$strColumn = $this->DB->get_column_name($strTable,$intColumn);
+		$strColumn = $this->DB->column_name($strTable,$intColumn);
 		
 		if(!$this->DB->table_exists($strTable) || !$this->DB->column_exists($strTable, $strColumn))
 		{
@@ -478,7 +481,7 @@ class Controller
 
 		try
 		{
-			$strColumnNew = @$_POST['field'];	
+			$strColumnNew = isset($_POST['field'])?$_POST['field']:'';	
 			if($this->DB->edit_column($strTable,$strColumn,$strColumnNew))
 			{
 				$this->Msg->set_msg("You renamed the field: $strColumn for $strColumnNew .");
@@ -486,7 +489,7 @@ class Controller
 				exit;
 			}
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -507,35 +510,52 @@ class Controller
 			$strTable = $url[TABLE];
 			$intColumn = $url[FIELD];
 			$nbrColumn = $this->DB->count_columns($strTable);
-			try
+			
+			$answer = @$_POST['inlineRadioOptions'];
+			if(!isset($answer) && isset($strTable))
 			{
-				$strColumn = $this->DB->get_column_name($strTable,$intColumn);
-				$this->DB->delete_column($strTable,$intColumn);
-				if(--$nbrColumn == 0)
+				$intTable = $this->DB->id_table($strTable);
+				$strColumn = $this->DB->column_name($strTable,$intColumn);
+				$refaction = WEBROOT.strtolower(get_class($this)).'/delete_field/'.$url[TABLE].'/'.$url[FIELD];
+				$this->question('Are you sure you want to delete this field  '.$this->colorize($strColumn,'red').' ?',$refaction,$intTable);
+				exit;
+			}
+			elseif($answer == 'yes')
+			{
+				try
 				{
-					@$this->Sys->del_lines_where('tables','strtable','==',$strTable,'id_table');
-					$this->Msg->set_msg("Since there is no more field, you deleted the table: $strTable");
-					header('Location:'.WEBROOT.$url[CONTROLLER]);
-					exit;
-				}
-				else
-				{
-					$this->Msg->set_msg("You removed the field $strColumn from the table $strTable.");
-					if(isset($url[VALUE]))
+					$strColumn = $this->DB->column_name($strTable,$intColumn);
+					$this->DB->delete_column($strTable,$intColumn);
+					if(--$nbrColumn == 0)
 					{
-						header('Location:'.WEBROOT.$url[CONTROLLER].'/show_fields/'.$url[TABLE]);
+						@$this->Sys->del_lines_where('tables','strtable','==',$strTable,'id_table');
+						$this->Msg->set_msg("Since there is no more field, you deleted the table: $strTable");
+						header('Location:'.WEBROOT.$url[CONTROLLER]);
 						exit;
 					}
 					else
 					{
-						header('Location:'.WEBROOT.$url[CONTROLLER].'/show_table/'.$url[TABLE]);
-						exit;
+						$this->Msg->set_msg("You removed the field $strColumn from the table $strTable.");
+						if(isset($url[VALUE]))
+						{
+							header('Location:'.WEBROOT.$url[CONTROLLER].'/show_fields/'.$url[TABLE]);
+							exit;
+						}
+						else
+						{
+							header('Location:'.WEBROOT.$url[CONTROLLER].'/show_table/'.$url[TABLE]);
+							exit;
+						}
 					}
 				}
+				catch (\Exception $t)
+				{
+					$this->Msg->set_msg($t->getMessage());
+					header('Location:'.WEBROOT.$url[CONTROLLER].'/show_table/'.$url[TABLE]);
+				}
 			}
-			catch (Throwable $t)
+			else 
 			{
-				$this->Msg->set_msg($t->getMessage());
 				header('Location:'.WEBROOT.$url[CONTROLLER].'/show_table/'.$url[TABLE]);
 			}
 		}
@@ -547,16 +567,16 @@ class Controller
 	function show_fields($url)
 	{
 		$this->properties('left',$url[TABLE]);
-		$id = $this->DB->get_id_table($url[TABLE]);
+		$id = $this->DB->id_table($url[TABLE]);
 		$this->data['idtable'] = $id;
-		$this->data['columns'] = $this->DB->get_columns($id);
+		$this->data['columns'] = $this->DB->columns($id);
 		$this->data['content'] = $this->Template->load('fields',$this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
 	function add_record($url)
 	{
 		$strTable=$url[TABLE];
-		//LEFT
+		// Properties function is setting the id_table, primary and table. See properties function.
 		$this->properties('left',$strTable);
 		$post = @$_POST;
 		try
@@ -566,7 +586,7 @@ class Controller
 				header('location:'.WEBROOT.strtolower(get_class($this)));
 				exit;
 			}
-			$last = $this->DB->get_last($this->DB->table);
+			$last = $this->DB->last($this->DB->table);
 			$post[$this->DB->primary] = ++$last;
 			if($strTable=='users' && strtolower(get_class($this))=='system' && isset($post['password']))
 			{
@@ -577,26 +597,26 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
 		$this->get_message();
 		$this->data['legend'] = "Add a record to the table: $strTable";
 		$this->data['placeholder'] = 'Add a record';
-		$this->data['columns'] = $this->DB->get_columns_of($strTable);
+		$this->data['columns'] = $this->DB->columns($strTable);
 		//var_dump($this->data['columns']); exit;
 		foreach($this->data['columns'] as $key=>$col)
 		{
 			if(substr($col, -3, 1)=="_")
 			{
 				$tblList = stristr($col, '_', true).'s';
-				$strListColumns = $this->DB->get_columns_of($tblList);
+				$strListColumns = $this->DB->columns($tblList);
 				//dropdown($cols,$strTable,$selectName,$value=null)
 				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col);
 			}
 		}
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/add_record/'.$strTable;
 		$this->data['content'] = $this->Template->load('add-rec', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -619,23 +639,23 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			//exit;
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
 		$this->get_message();
 		$this->data['legend'] = "Edit a record in the table: $strTable" ;
 		$this->data['placeholder'] = 'Edit a record';
-		$this->data['columns'] = $this->DB->get_columns_of($strTable);
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['columns'] = $this->DB->columns($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['line'] = $url[INDEX];
-		$this->data['record'] = $this->DB->get_line($this->data['table'],$url[INDEX]);
+		$this->data['record'] = $this->DB->line($this->data['table'],$url[INDEX]);
 		foreach($this->data['columns'] as $key=>$col)
 		{
 			if(substr($col, -3, 1)=="_")
 			{
 				$tblList = stristr($col, '_', true).'s';
-				$strListColumns = $this->DB->get_columns_of($tblList);
+				$strListColumns = $this->DB->columns($tblList);
 				//dropdown($cols,$strTable,$selectName,$value=null)
 				$value = $this->data['record'][$key];
 				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col,$value);
@@ -651,11 +671,11 @@ class Controller
 		{
 			$strTable = $url[TABLE];
 			$idRec = $url[FIELD];
-			$idTable = $this->DB->get_id_table($strTable);
+			$idTable = $this->DB->id_table($strTable);
 			$answer = @$_POST['inlineRadioOptions'];
 			if(!isset($answer) && isset($strTable))
 			{
-				$tab = $this->DB->get_id_table($strTable);
+				$tab = $this->DB->id_table($strTable);
 				$refaction = WEBROOT.strtolower(get_class($this)).'/delete_record/'.$url[TABLE].'/'.$url[FIELD];
 				$this->question('Are you sure you want to delete this record '.$this->colorize($idRec,'red').' ?',$refaction,$tab);
 				exit;
@@ -681,14 +701,14 @@ class Controller
 		$post = @$_POST;
 		try
 		{
-			$table = $this->DB->get_id_table($strTable);
-			$column = @$this->DB->get_id_column($strTable,$post['strfield']);
+			$table = $this->DB->id_table($strTable);
+			$column = @$this->DB->id_column($strTable,$post['strfield']);
 			@$this->DB->del_doublon($table,$column);
 			$this->Msg->set_msg("You deleted doublons from the table: ".$url[TABLE]);
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -700,7 +720,7 @@ class Controller
 
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Use this column to identify doublons.');
 	
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/delete_doublons/'.$strTable;
 		$this->data['content'] = $this->Template->load('del-doublons', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -711,10 +731,10 @@ class Controller
 		try
 		{
 			//$records = $this->DB->get_where($url[TABLE],$url[FIELD],'==',$url[VALUE]);
-			$columns = $this->DB->get_columns_of($url[TABLE]);
+			$columns = $this->DB->columns($url[TABLE]);
 			$records = $this->DB->select_where($columns,$url[TABLE],$url[FIELD],'==',$url[VALUE]);
 		}
-		catch(Throwable $t)
+		catch(\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -725,7 +745,7 @@ class Controller
 			//LEFT
 			$this->properties('left',$strTable);
 			//CONTENT
-			$this->data['columns'] = $this->DB->get_columns_of($strTable);
+			$this->data['columns'] = $this->DB->columns($strTable);
 
 			$x=0;
 			$p=0;
@@ -746,13 +766,13 @@ class Controller
 				$i = 0;
 				foreach($t as $k=>$value)
 				{
-					$table = $this->DB->get_id_table($strTable);
-					$col = $this->DB->get_column_name($table,$k);
+					$table = $this->DB->id_table($strTable);
+					$col = $this->DB->column_name($table,$k);
 					if(substr($col, -3, 3)=="_id")
 					{
 						$strForeignTable = stristr($col, '_', true).'s';
 						$col = stristr($col, '_', true);
-						$rec = $this->DB->get_where_unique($strForeignTable,'id_'.$col,$value);
+						$rec = $this->DB->where_unique($strForeignTable,'id_'.$col,$value);
 						$tbody .= '<td>';
 						if($rec)
 						{
@@ -773,7 +793,7 @@ class Controller
 							$str = $arr[1].'s';
 							try
 							{
-								$records =$this->DB->get_where('rules','master','==',$str);
+								$records =$this->DB->where('rules','master','==',$str);
 								if($records)
 								{
 									$a = '<span>'.$value.' </span>';
@@ -788,7 +808,7 @@ class Controller
 									$tbody .= '<td>'.$value.'</td>';
 								}
 							}
-							catch (Throwable $t)
+							catch (\Exception $t)
 							{
 								$tbody .= '<td>'.$value.'</td>';
 							}
@@ -961,7 +981,7 @@ class Controller
 			$this->data['sys'] = $this->Sys;
 			$this->data[$view] = $this->Template->load($properties, $this->data,TRUE);
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -986,12 +1006,6 @@ class Controller
 		{
             unset($this->$key);
         }
-	}
-	function console_log($data)
-	{
-	  echo '<script>';
-	  echo 'console.log('. json_encode( $data ) .')';
-	  echo '</script>';
 	}
 	function jumbo($bool)
 	{
@@ -1070,7 +1084,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1085,7 +1099,7 @@ class Controller
 		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will be use by the operator for comparison');
 		$this->data['listuniques'] = $this->Template->cdropdown($this->DB,$strTable,'unique',NULL,NULL,'unique',' : A field name that contains only unique value. Usually begin with id_');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/delete_where/'.$strTable;
 		$this->data['content'] = $this->Template->load('del-rec-where', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1107,7 +1121,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1120,7 +1134,7 @@ class Controller
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,TRUE,'column');
 		$this->data['divstring'] = $this->Template->makediv('string','new column',' : New name for the field');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/copy_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('copy-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1143,7 +1157,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1164,7 +1178,7 @@ class Controller
 			$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',$post['strfield']);
 		}
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/split_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('split-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1187,7 +1201,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1207,7 +1221,7 @@ class Controller
 			$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',$post['strfield']);
 		}
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/split_column_needle/'.$strTable;
 		$this->data['content'] = $this->Template->load('split-column-needle', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1229,7 +1243,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$post['totable']);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1242,7 +1256,7 @@ class Controller
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column');
 		$this->data['listtotables'] = $this->Template->dropdown($this->Sys,'tables','totable',2);
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/move_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('move-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1264,7 +1278,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$post['totable']);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1281,7 +1295,7 @@ class Controller
 		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE);
 		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/copy_column_keys/'.$strTable;
 		$this->data['content'] = $this->Template->load('copy-column-keys', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1304,7 +1318,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$post['totable']);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1324,7 +1338,7 @@ class Controller
 		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE,NULL,' : You can use the "LIKE" operator to search a string into the field.');
 		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/copy_data_keys/'.$strTable;
 		$this->data['content'] = $this->Template->load('copy-data-keys', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1348,7 +1362,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1364,7 +1378,7 @@ class Controller
 		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE);
 		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/copy_text_where/'.$strTable;
 		$this->data['content'] = $this->Template->load('copy-text-where', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1387,7 +1401,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1400,7 +1414,7 @@ class Controller
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column A',' : This column to be move');
 		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,$strTable,'tofield',NULL,FALSE,'column B',' : The field that will serve for switching');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/switch_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('switch-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1420,7 +1434,7 @@ class Controller
 			$answer = @$_POST['inlineRadioOptions'];
 			if(!isset($answer) && isset($post['table']) && isset($post['strfield']) && isset($post['tofield']) && isset($post['unique']))
 			{
-				$tab = $this->DB->get_id_table($strTable);
+				$tab = $this->DB->id_table($strTable);
 				$refaction = WEBROOT.strtolower(get_class($this)).'/merge_rows/'.$url[TABLE];
 				$this->question('Are you sure you want to merge rows of table '.$url[TABLE].' into '.$this->colorize($post['unique'],'red').' ?',$refaction,$tab,$post);
 				exit;
@@ -1434,7 +1448,7 @@ class Controller
 				exit;
 			}
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1448,7 +1462,7 @@ class Controller
 		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,$strTable,'tofield',NULL,FALSE,'line',' : The field that will serve for sorting');
 		$this->data['listuniques'] = $this->Template->cdropdown($this->DB,$strTable,'unique',NULL,FALSE,'concatenation',' : The column that will receive the concat text. First row of all. Other rows will be deleted.');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/merge_rows/'.$strTable;
 		$this->data['content'] = $this->Template->load('merge-rows', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1473,7 +1487,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$post['totable']);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1488,7 +1502,7 @@ class Controller
 		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,'empty','tofield',NULL,FALSE,NULL,' : Match keys of the table that will receive the column');
 		$this->data['listuniques'] = $this->Template->cdropdown($this->DB,$strTable,'unique',NULL,FALSE,NULL,' : Unique key of the table that has the column you want to move');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/move_one_to_many/'.$strTable;
 		$this->data['content'] = $this->Template->load('move-one-to-many', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1510,7 +1524,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1523,7 +1537,7 @@ class Controller
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Column to be renumbered');
 		$this->data['divvalue'] = $this->Template->makediv('value','start',' : Beginning value');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/renumber_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('renumber-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1546,7 +1560,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1560,7 +1574,7 @@ class Controller
 		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,NULL,'tofield',NULL,NULL,'Slave key',' : Column to match the master old key and then change it for new key.');
 		$this->data['listuniques'] = $this->Template->cdropdown($this->DB,$strTable,'unique',NULL,NULL,'Master new key',' : This column contains new keys');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/match_column/'.$strTable;
 		$this->data['content'] = $this->Template->load('match-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1583,7 +1597,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1597,7 +1611,7 @@ class Controller
 		$this->data['divstring'] = $this->Template->makediv('string','filter',' : Separate wanted fields with a comma ex: Address,City,State');
 		$this->data['divvalue'] = $this->Template->makediv('value','delimiter',' : Set a result delimiter, if empty it will be a space by default');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/concat_columns/'.$strTable;
 		//$this->data['design'] = (object)$this->Template;
 		$this->data['content'] = $this->Template->load('concat-columns', $this->data,TRUE);
@@ -1621,7 +1635,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1634,7 +1648,7 @@ class Controller
 		//dropdown_where($db,$strTable,$selectName,$retcol=1,$value=NULL,$header=FALSE,$label=NULL,$help=NULL,$offset=0,$op='==')
 		$this->data['listoperators'] = $this->Template->dropdown_where($this->Sys,'operators','operator',2,10,TRUE,NULL,' : Identify the current format of the date you want to change',NULL,'>=');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/date_corrector/'.$strTable;
 		$this->data['content'] = $this->Template->load('date-corrector', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1656,7 +1670,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1669,7 +1683,7 @@ class Controller
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,TRUE,'column',' : This time column to be corrected');
 		$this->data['listoperators'] = $this->Template->dropdown_where($this->Sys,'operators','operator',2,28,TRUE,NULL,' : Identify the current format of the time field you want to change',NULL,'>');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/time_corrector/'.$strTable;
 		$this->data['content'] = $this->Template->load('time-corrector', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
@@ -1677,8 +1691,8 @@ class Controller
 	function copy_table($url)
 	{
 		$copy = $this->DB->copy_table($url[TABLE]);
-		$lastdm = $this->Sys->get_last('tables');
-		$idtabdm = $this->Sys->get_id_table('tables');
+		$lastdm = $this->Sys->last('tables');
+		$idtabdm = $this->Sys->id_table('tables');
 		$post['table'] = $idtabdm;
 		$post['id_table'] = ++$lastdm;
 		$post['strtable'] = $copy;
@@ -1689,7 +1703,7 @@ class Controller
 	}
 	function get_fields()
 	{
-		$cols = $this->DB->get_columns_of($_POST['strtable']);
+		$cols = $this->DB->columns($_POST['strtable']);
 		foreach($cols as $id=>$col)
 		{
 			$fields_arr[] = array("id" => $id, "col" => $col);
@@ -1698,27 +1712,13 @@ class Controller
 	}
 	function get($url)
 	{
-		$cols = $this->DB->get_columns_of($url[TABLE]);
-		$rec = $this->DB->get_where_unique($url[TABLE],$url[FIELD],$url[VALUE]);
+		$cols = $this->DB->columns($url[TABLE]);
+		$rec = $this->DB->where_unique($url[TABLE],$url[FIELD],$url[VALUE]);
 		$this->DB->unescape($rec);
 		$record = $this->DB->combine($cols,$rec);
 		header('Content-Type: application/json; charset=UTF-8');
 		echo json_encode($record,JSON_UNESCAPED_UNICODE);
 		return json_encode($record);
-	}
-	function get_sfields()
-	{
-		$cols = $this->DB->get_columns_of($_POST['totable']);
-		foreach($cols as $id=>$col)
-		{
-			$fields_arr[] = array("id" => $id, "col" => $col);
-		}
-		echo json_encode($fields_arr);
-	}
-	function get_count()
-	{
-		$count = $this->DB->count($_POST['strtable']);
-		echo json_encode($count);
 	}
 	function find_replace($url)
 	{
@@ -1740,7 +1740,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 			exit();
 		}
-		catch (Throwable $t)
+		catch (\Exception $t)
 		{
 			$this->Msg->set_msg($t->getMessage());
 		}
@@ -1754,7 +1754,7 @@ class Controller
 		$this->data['divstring'] = $this->Template->makediv('string','filter',' : Text to search');
 		$this->data['divvalue'] = $this->Template->makediv('value','text',' : Replace by this text');
 
-		$this->data['table'] = $this->DB->get_id_table($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/find_replace/'.$strTable;
 		$this->data['design'] = (object)$this->Template;
 		$this->data['content'] = $this->Template->load('find-replace', $this->data,TRUE);
@@ -1764,7 +1764,7 @@ class Controller
 	{
 		$this->DB->initialize();
 		//For tables list
-		$idtab = $this->Sys->get_id_table('tables');
+		$idtab = $this->Sys->id_table('tables');
 		$this->Sys->empty_table($idtab);
 
 		$this->Msg->set_msg('You have initialized '.$this->data['title']);
@@ -1773,6 +1773,19 @@ class Controller
 	function demo()
 	{
 		$this->DB->demo();
+		//For system tables list
+		$last = $this->Sys->last('tables');
+		$idtab = $this->Sys->id_table('tables');
+		$post['table'] = $idtab;
+		
+		$post['id_table'] = ++$last;
+		$post['strtable'] = 'users';
+		$this->Sys->add_line($post,'id_table');
+		
+		$post['id_table'] = ++$last;
+		$post['strtable'] = 'notes';
+		$this->Sys->add_line($post,'id_table');
+		
 		$this->Msg->set_msg('You have loaded demo data ');
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
@@ -1889,7 +1902,7 @@ class Controller
 	function add_file_to_sys($strTable,$extension)
 	{
 		// Ajoute un fichier a la table files de la base system.
-		$post['table'] = $this->Sys->get_id_table('files');
+		$post['table'] = $this->Sys->id_table('files');
 		$post['file'] = $strTable.'.'.$extension;
 		$this->Sys->add_line($post,'id_file');
 	}
@@ -1990,11 +2003,7 @@ class Controller
 	{
 		$this->cleanup();
 	}
-	function get_json()
-	{
-		header("Content-Type: text/plain");
-		echo  json_encode($this->DB->get_cell(4,1,2));
-	}
+
 	function get_php_file($url)
 	{
 		//var_dump($url); exit;

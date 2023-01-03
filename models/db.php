@@ -1,14 +1,14 @@
 <?php 
 /**
-* @class: Get
-* @version: 8.1
+* @class: DB
+* @version:	8.2
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2022-12-29 10:00
+* @revision: 2023-01-03 15:25
 * @note: retrait de tout ce qui concerne mysql
 * @licence MIT
 */ 
-class DB extends Model
+class DB extends  Core\Model
 {
 	public function initialize()
 	{
@@ -64,13 +64,13 @@ class DB extends Model
 	}
 	public function load_php($strTable)
 	{
-		$table = $this->get_id_table($strTable);
-		//var_dump($table); exit;
+		$table = $this->id_table($strTable);
+
 		if($table == 0)
 		{
 			$msg = 'You tried to load a table that does not have a key table. Try to import the original table before loading a big file that is attached to it.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-			throw new Exception($msg);
+			throw new  \Exception($msg);
 			exit;
 		}
 		if(file_exists($this->datapath.$strTable.'.php')) 
@@ -84,43 +84,37 @@ class DB extends Model
 				{
 					$msg = "First keys : $firstKey of the table does not match the main key : $table for this table !";
 					$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-					throw new Exception($msg);
+					throw new \Exception($msg);
 					exit;
 				}
-				//$this->preprint($data); exit;
-				//unset($this->data[$table]);
 				$this->data[$table] = $data[$firstKey]; 
-				//Cette fonction sert en cas que les indices d'un fichier loader ne commence pas a 1 mais a 10000 par exemple.
-				//sleep(1);
 				$this->repair_table($table);
-				//$_SESSION['phpfile'] = $strTable.$index.'.php';
 				$_SESSION['phpfile'] = $strTable;
-				//$this->save();
 			}
 			catch (Throwable $t)
 			{
 				$msg = $t->getMessage();
 				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-				throw new Exception($msg);
+				throw new \Exception($msg);
 			}
 		} 
 		else 
 		{
 			$msg = 'The file '.$this->datapath.$strTable.'.php does not exist';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-			throw new Exception($msg);
+			throw new \Exception($msg);
 		}
 	}
-	public function save_php($strTable,$append=FALSE)
+	public function save_php($strTable,$append=false)
 	{
 		unset($_SESSION['phpfile']);
 		
 		if (is_string($append) && ($append == "FALSE" || $append == "false"))
 		{
-			$append =FALSE;
+			$append =false;
 		}
 		
-		if($append)
+		if($append && file_exists($this->datapath.$strTable.'.php')) 
 		{
 			// Premièrement ouvrir le fichier existant pour enlever le "?" à la fin.
 			$string = file_get_contents(DATADIRECTORY.$strTable.'.php');
@@ -129,7 +123,7 @@ class DB extends Model
 			file_put_contents(DATADIRECTORY.$strTable.'.php',trim($string));
 			
 			$this->load_php($strTable);
-			$table = $this->get_id_table($strTable);
+			$table = $this->id_table($strTable);
 			$data = $this->table($strTable);
 			//$this->preprint($data); exit;
 			$puts = '';
@@ -156,7 +150,7 @@ class DB extends Model
 		else
 		{
 			$data = $this->table($strTable,TRUE);
-			$table = $this->get_id_table($strTable);
+			$table = $this->id_table($strTable);
 			//$this->preprint($data); exit;
 			$puts = '<?php';
 			if(isset($data))
@@ -180,13 +174,13 @@ class DB extends Model
 		$_SESSION['phpfile'] = $strTable.'.php';
 	}
 	
-	public function save_csv($strTable,$append=FALSE)
+	public function save_csv($strTable,$append=false)
 	{
 		unset($_SESSION['csvfile']);
 		
 		if (is_string($append) && ($append == "FALSE" || $append == "false"))
 		{
-			$append =FALSE;
+			$append =false;
 		}
 
 		$data = $this->table($strTable,!$append);	
@@ -209,7 +203,7 @@ class DB extends Model
 				$puts .= "\n";
 			}
 		}
-		if($append)
+		if($append && file_exists($this->datapath.$strTable.'.csv'))
 		{
 			file_put_contents(DATADIRECTORY.$strTable.'.csv',$puts,FILE_APPEND | LOCK_EX);
 		}
@@ -222,11 +216,11 @@ class DB extends Model
 	
 	public function load_csv($strTable)
 	{
-		$t = $this->get_id_table($strTable);
+		$t = $this->id_table($strTable);
 		$row = 0;
-		if (($handle = fopen(DATADIRECTORY.$strTable.'.csv', "r")) !== FALSE) 
+		if (($handle = fopen(DATADIRECTORY.$strTable.'.csv', "r")) !== false) 
 		{
-			while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) 
+			while (($data = fgetcsv($handle, 1000, ",")) !== false) 
 			{
 				$num = count($data);
 				//echo "<p> $num fields in line $row: <br /></p>\n";
@@ -253,7 +247,7 @@ class DB extends Model
 	public function load_json($strTable)
 	{
 		$json =  json_decode(file_get_contents( DATADIRECTORY.$strTable.'.json'),TRUE);
-		$table= $this->get_id_table($strTable);
+		$table= $this->id_table($strTable);
 		$records =  $json[$strTable];
 		$columns = $this->get_columns($table);
 		foreach($records as $r=>$record)
@@ -269,21 +263,21 @@ class DB extends Model
 		$this->save();	
 	}
 	
-	public function save_json($strTable,$append=FALSE)
+	public function save_json($strTable,$append=false)
 	{
 		unset($_SESSION['jsonfile']);
 		
 		if (is_string($append) && ($append == "FALSE" || $append == "false"))
 		{
-			$append =FALSE;
+			$append =false;
 		}
 
-		if($append)
+		if($append && file_exists($this->datapath.$strTable.'.json'))
 		{
 			$string = file_get_contents(DATADIRECTORY.$strTable.'.json');
 			$string = str_replace("]}","",$string);
 			file_put_contents(DATADIRECTORY.$strTable.'.json',trim($string).','."\n");
-			$fields = $this->get_columns_of($strTable);
+			$fields = $this->columns($strTable);
 			$data = $this->table($strTable);	
 			//$puts = '{ ';
 			$puts = '';
@@ -318,7 +312,7 @@ class DB extends Model
 		}
 		else
 		{
-			$fields = $this->get_columns_of($strTable);
+			$fields = $this->columns($strTable);
 			$data = $this->table($strTable);	
 			$puts = '{ ';
 			if(isset($data))
@@ -354,21 +348,21 @@ class DB extends Model
 		$_SESSION['jsonfile'] = $strTable.'.json';
 	}
 	
-	public function save_js($strTable,$append=FALSE)
+	public function save_js($strTable,$append=false)
 	{
 		unset($_SESSION['jsfile']);
 		
 		if (is_string($append) && ($append == "FALSE" || $append == "false"))
 		{
-			$append =FALSE;
+			$append =false;
 		}
 
-		if($append)
+		if($append && file_exists($this->datapath.$strTable.'.js'))
 		{
 			$string = file_get_contents(DATADIRECTORY.$strTable.'.js');
 			$string = str_replace("];","",$string);
 			file_put_contents(DATADIRECTORY.$strTable.'.js',trim($string).','."\n");
-			$fields = $this->get_columns_of($strTable);
+			$fields = $this->columns($strTable);
 			$data = $this->table($strTable);	
 			//$puts = '{ ';
 			$puts = '';
@@ -403,7 +397,7 @@ class DB extends Model
 		}
 		else
 		{
-			$fields = $this->get_columns_of($strTable);
+			$fields = $this->columns($strTable);
 			$data = $this->table($strTable);	
 			$puts = '';
 			if(isset($data))

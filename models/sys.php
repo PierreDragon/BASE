@@ -1,5 +1,5 @@
 <?php  
-class Sys extends Model
+class Sys extends Core\Model
 {
 
 }

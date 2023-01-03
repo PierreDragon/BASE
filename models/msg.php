@@ -1,5 +1,5 @@
 <?php  
-class Msg extends Model
+class Msg extends  Core\Model
 {
 	public function get_msg($unescape=FALSE)
 	{

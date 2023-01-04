@@ -2,10 +2,9 @@
 /**
 * @class: Controller
 * @version:	8.9
-* @author: pierre.martin@live.ca
+* @author: info@webiciel.ca
 * @php: 7.4
 * @revision: 2022-12-30 15:00
-* @Ajouter la capture de fichier view inexistant 
 * @licence MIT
 */
 class Template 

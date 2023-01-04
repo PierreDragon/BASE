@@ -22,7 +22,7 @@ define('LINE',2);
 define('FIELD',3);
 define('INDEX',3);
 define('VALUE',4);
-define('VERSION','1.3');
+define('VERSION','2.0');
 
 require(ROOT.'core/model.php');
 require(ROOT.'core/controller.php');

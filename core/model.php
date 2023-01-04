@@ -106,7 +106,7 @@ class Model
 		}
 		return $lines;
 	}
-	public function count_max_lines()
+	public function count_max_lines(): int
 	{
 		$i = 1;
 		while($i <= $this->n_tables)

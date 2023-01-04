@@ -164,7 +164,6 @@ class Controller
 		}
 		$this->get_message();
 		$this->data['legend'] = 'Rename the table '.$url[TABLE] ;
-		//data-toggle="tooltip"
 		$this->data['tip'] = 'When you add or rename a table, it will be added to the table [tables] from system. Rename table are automatically lowercase.';
 		$this->data['placeholder'] = 'New name for table';
 		$this->data['name'] = 'newname';
@@ -369,6 +368,8 @@ class Controller
 									</script>';
 									$tbody .= '<td id="td'.$key.'" style="text-decoration:underline;">'.$value.'</td>';
 								}
+								//NEW
+								$idImage = $value;
 							}
 							catch (\Exception $t)
 							{
@@ -379,6 +380,16 @@ class Controller
 						{
 							$tbody .= '<td>'.$value.'</td>';
 						}
+					}
+					elseif($col == 'image')
+					{
+						$tbody .= '<script>	
+						$(document).ready(function(){
+						$("#img'.$idImage .'").click(function () { $("#img'.$idImage.'").toggleClass("minresize") } );	
+						});
+						</script>';
+									
+						$tbody .= '<td><img id="img'.$idImage .'" class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'"></td>';
 					}
 					else
 					{
@@ -592,6 +603,10 @@ class Controller
 			{
 				$post['password'] = trim(md5($post['password']));
 			}
+			if($strTable == 'images')
+			{
+				$post['alt']=$post['image'] = @$this->fupload();
+			}
 			$this->DB->add_line($post,$this->DB->primary);
 			$this->Msg->set_msg("You have added a record to table: $strTable");
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
@@ -683,6 +698,11 @@ class Controller
 			elseif($answer == 'yes')
 			{
 				$this->DB->check_rule($strTable,$idRec);		
+				if($strTable == 'images')
+				{
+					$image = $this->DB->get($strTable,$idRec,'image');
+					unlink($_SERVER['DOCUMENT_ROOT'].ASSETDIRECTORY.'uploads/'.$image);
+				}
 				$this->DB->del_line($idTable,$idRec);
 				$this->Msg->set_msg("You have deleted record: $idRec in the table: $strTable");
 			}
@@ -817,6 +837,10 @@ class Controller
 						{
 							$tbody .= '<td>'.$value.'</td>';
 						}
+					}
+					elseif($col == 'image')
+					{
+						$tbody .= '<td><img id="'.$k.'" onClick class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'"></td>';
 					}
 					else
 					{
@@ -1760,6 +1784,84 @@ class Controller
 		$this->data['content'] = $this->Template->load('find-replace', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+	public function fupload()
+	{
+		//$target_dir ='C:/xampp/htdocs/BASIC/assets/uploads/';
+		$target_dir =$_SERVER['DOCUMENT_ROOT'].ASSETDIRECTORY.'uploads/';
+		$target_file = $target_dir . basename($_FILES["image"]["name"]);
+		$uploadOk = 1;
+		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+		// Check if image file is a actual image or fake image
+		if(isset($_POST["submit"]))
+		{
+			$check = getimagesize($_FILES["image"]["tmp_name"]);
+			if($check !== false)
+			{
+				$this->Msg->set_msg( "File is an image - " . $check["mime"] . ".");
+				$uploadOk = 1;
+			} 
+			else
+			{
+				$msg = 'File is not an image.';
+				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+				throw new \Exception($msg);
+				//$this->Msg->set_msg("File is not an image.");
+				$uploadOk = 0;
+			}
+		}
+		// Check if file already exists
+		if (file_exists($target_file))
+		{
+			$msg = 'Sorry, file already exists.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//exit;
+			//$this->Msg->set_msg( "Sorry, file already exists.");
+			$uploadOk = 0;
+		}
+		// Check file size
+		if ($_FILES["image"]["size"] > 500000) 
+		{
+			$msg = 'Sorry, your file is too large.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, your file is too large.");		 
+			$uploadOk = 0;
+		}
+		// Allow certain file formats
+		if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" )
+		{
+			$msg = 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, only JPG, JPEG, PNG & GIF files are allowed.");	
+			$uploadOk = 0;
+		}
+		// Check if $uploadOk is set to 0 by an error
+		if ($uploadOk == 0) 
+		{
+			$msg = 'Sorry, your file was not uploaded.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, your file was not uploaded.");	
+		} 
+		else 
+		{
+			if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) 
+			{
+				$this->Msg->set_msg("The file ". htmlspecialchars( basename( $_FILES["image"]["name"])). " has been uploaded.");
+				return $_FILES["image"]["name"];
+			} 
+			else
+			{
+				$msg = 'Sorry, there was an error uploading your file.';
+				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+				throw new \Exception($msg);
+				//$this->Msg->set_msg("Sorry, there was an error uploading your file.");
+			}
+		}
+	}
+	
 	function ini()
 	{
 		$this->DB->initialize();

@@ -25,4 +25,4 @@
 </form>
 <br>
 <h4>TIP : <em>testkey</em> can be named differently from one table to another.</h4>
-<img src="<?=ASSETDIRECTORY.$path?>/img/onetomany.png">
+<img src="<?=ASSETDIRECTORY.$path?>img/onetomany.png">

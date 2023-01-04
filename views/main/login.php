@@ -302,7 +302,7 @@ input[type=text]:placeholder {
     </form>
 	
     <div id="formFooter">
-		<?php echo (isset($msg))?$msg:''; ?>
+		<?php //echo (isset($msg))?$msg:''; ?>
 		<?php echo '<small>Current PHP version: ' . phpversion() . '</small>'; ?>
 	</div>
 

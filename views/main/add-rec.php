@@ -1,4 +1,4 @@
-<form name="frmAjout" action="<?php echo $action; ?>" method="post">
+<form name="frmAjout" action="<?php echo $action; ?>" method="post" enctype="multipart/form-data">
 	<legend><?php echo $legend ?></legend>
 		<?php  
 		foreach($columns as $id=>$colonne)
@@ -23,6 +23,13 @@
 				echo '<div class="form-group">';
 				echo '<label for="'.$colonne.'">'.$colonne.'</label>';
 				echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="time">';
+				echo '</div>';
+			}
+			elseif($colonne=='image')
+			{
+				echo '<div class="form-group">';
+				echo '<label for="'.$colonne.'">'.$colonne.'</label>';
+				echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="file">';
 				echo '</div>';
 			}
 			else

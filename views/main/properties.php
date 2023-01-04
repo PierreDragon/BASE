@@ -4,7 +4,7 @@
 	Table    : <strong><a href="<?php echo WEBROOT.$controller.'/show_table/'.$thead?>" onclick="includeHTML()"><?=$thead?></a></strong><br> 
 	Fields   : <span class="badge"><?=$nbrcolonne?></span><br>    
 	Records  : <span class="badge"><?=$nbrligne?></span><br>
-	Show Limit : <span class="badge"><?=$showlimit?></span><br>
+	Show Limit per page : <span class="badge"><?=$showlimit?></span><br>
 	Offset : <span class="badge"><?=$offset?></span><br>
 	<?php if(isset($_SESSION['phpfile'])): $link = strstr($_SESSION['phpfile'],'.',TRUE)?>
 	PHP data file : <strong><a href="<?php echo WEBROOT.$controller.'/get_php_file/'.$link ?>" target="_blank"><?=$_SESSION['phpfile']?></a></strong><br>

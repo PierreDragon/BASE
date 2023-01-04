@@ -20,8 +20,9 @@ $path =(isset($path))? $path.'/' : '';
 <script type="text/javascript" src="<?=ASSETDIRECTORY?><?=$path?>js/jquery-ui.min.js"></script>
 
 <link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/bootstrap.css" media="screen">
-<link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/note.css" media="screen">
 <link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/nav.css" media="screen">
+<link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/image.css" media="screen">
+<link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/note.css" media="screen">
 
 <script>
 $(document).ready(function(){
@@ -80,9 +81,6 @@ $(document).ready(function(){
            //alert(selectedRow);
         }
     });
-
-	//$("#td1").editable("/conversion/main/set_cell/2/1/1",{ name : 'value'});
-	//$("td").editable("/conversion/main/set_cell/");
 
 });
 </script>

@@ -26,6 +26,7 @@ class DB extends  Core\Model
 		$this->data[0][0][1]='rules';
 		$this->data[0][0][2]='users';
 		$this->data[0][0][3]='notes';
+		$this->data[0][0][4]='images';
 		$this->data[1][0][1]='id_rule';
 		$this->data[1][0][2]='master';
 		$this->data[1][0][3]='slave';
@@ -60,6 +61,9 @@ class DB extends  Core\Model
 		$this->data[3][5][1]='5';
 		$this->data[3][5][2]='note 5';
 		$this->data[3][5][3]='3';
+		$this->data[4][0][1]='id_image';
+		$this->data[4][0][2]='image';
+		$this->data[4][0][3]='alt';
 		$this->save();
 	}
 	public function load_php($strTable)

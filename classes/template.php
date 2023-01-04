@@ -1,8 +1,8 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version: 8.9
-* @author: webiciel.ca
+* @version:	8.9
+* @author: pierre.martin@live.ca
 * @php: 7.4
 * @revision: 2022-12-30 15:00
 * @Ajouter la capture de fichier view inexistant 
@@ -10,7 +10,7 @@
 */
 class Template 
 {
-	public function load($view, $data = array(), $return=FALSE)
+	public function load($view, $data = array(), $return=false)
 	{
 		if(!empty($data)) extract($data);
 		$path =(isset($path))? $path.'/' : '';
@@ -22,7 +22,7 @@ class Template
 		require(VIEWDIRECTORY.$path.$view.'.php');
 		$contents = ob_get_clean();
 		
-		if($return==FALSE)
+		if($return==false)
 		{
 			echo $contents;
 		}
@@ -40,10 +40,10 @@ class Template
 		$html .= '</div>';
 		return $html;
 	}
-	public function datalist($db,$strTable,$selectName,$retcol=1,$value=NULL,$header=FALSE,$label=NULL,$help=NULL)
+	public function datalist($db,$strTable,$selectName,$retcol=1,$value=null,$header=false,$label=null,$help=null)
 	{
 		
-		$cols = $db->get_columns_of($strTable);
+		$cols = $db->columns($strTable);
 		$rec = $db->select($cols,$strTable);
 		
 		$label = (isset($label)?$label:$selectName);
@@ -80,9 +80,9 @@ class Template
 		$html .= '</div>';
 		return $html;
 	}
-	public function dropdown($db,$strTable,$selectName,$retcol=1,$value=NULL,$header=FALSE,$label=NULL,$help=NULL,$offset=0)
+	public function dropdown($db,$strTable,$selectName,$retcol=1,$value=null,$header=false,$label=null,$help=null,$offset=0)
 	{
-		$cols = $db->get_columns_of($strTable);
+		$cols = $db->columns($strTable);
 		$rec = $db->select($cols,$strTable);
 		$label = (isset($label)?$label:$selectName);
 		$html  = '<div id="div'.$selectName.'" class="form-group">';
@@ -121,13 +121,13 @@ class Template
 		return $html;
 	}
 	
-	public function dropdown_where($db,$strTable,$selectName,$retcol=1,$value=NULL,$header=FALSE,$label=NULL,$help=NULL,$offset=0,$op='==')
+	public function dropdown_where($db,$strTable,$selectName,$retcol=1,$value=null,$header=false,$label=null,$help=null,$offset=0,$op='==')
 	{
-		$cols = $db->get_columns_of($strTable);
+		$cols = $db->columns($strTable);
 		$rec = $db->select_where($cols,$strTable,$cols[1],$op,$value);
 		if(is_null($rec))
 		{
-			return FALSE;
+			return false;
 		}
 		$label = (isset($label)?$label:$selectName);
 		$html  = '<div id="div'.$selectName.'" class="form-group">';
@@ -165,7 +165,7 @@ class Template
 		$html .= '</div>';
 		return $html;
 	}
-	public function cdropdown($db,$strTable,$selectName,$value=NULL,$header=FALSE,$label=NULL,$help=NULL)
+	public function cdropdown($db,$strTable,$selectName,$value=null,$header=false,$label=null,$help=null)
 	{
 		$label = (isset($label)?$label:$selectName);
 		$html  = '<div id="div'.$selectName.'" class="form-group">';
@@ -173,7 +173,7 @@ class Template
 		$html .= '<select class="form-control input-sm" id="'.$selectName.'" name="'.$selectName.'">';
 		if(isset($strTable))
 		{
-			$cols = $db->get_columns_of($strTable);
+			$cols = $db->columns($strTable);
 			if($header)
 			{
 				$html .= '<option value="">-- select field --</option>';

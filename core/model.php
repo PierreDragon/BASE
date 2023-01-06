@@ -649,7 +649,8 @@ class Model
 		if(empty($post['table']) || empty($post['line']))
 		{
 			//$msg = 'function model::set_line() Real ID of the table or Line is not set.';
-			$msg = 'Model line '.__LINE__ ;
+			//$msg = 'Model line '.__LINE__ ;
+			$msg ='';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;

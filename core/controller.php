@@ -383,13 +383,8 @@ class Controller
 					}
 					elseif($col == 'image')
 					{
-						$tbody .= '<script>	
-						$(document).ready(function(){
-						$("#img'.$idImage .'").click(function () { $("#img'.$idImage.'").toggleClass("minresize") } );	
-						});
-						</script>';
-									
-						$tbody .= '<td><img id="img'.$idImage .'" class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'"></td>';
+						$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).toggleClass(\'minresize\');" /></td>';
+						//$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).removeClass(\'maxresize\');" /></td>';
 					}
 					else
 					{
@@ -827,6 +822,8 @@ class Controller
 								{
 									$tbody .= '<td>'.$value.'</td>';
 								}
+								//NEW
+								$idImage = $value;
 							}
 							catch (\Exception $t)
 							{
@@ -840,7 +837,8 @@ class Controller
 					}
 					elseif($col == 'image')
 					{
-						$tbody .= '<td><img id="'.$k.'" onClick class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'"></td>';
+						//$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).toggleClass(\'maxresize\');" /></td>';
+						$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).toggleClass(\'minresize\');" /></td>';
 					}
 					else
 					{

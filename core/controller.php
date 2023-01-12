@@ -7,9 +7,8 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @version:	9.0
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2023-01-03 11:30
-* @add the namespace
-* @change Throwable for \Exception
+* @revision: 2023-01-12 00:19
+* @rename function delete_doublon for delete_duplicates
 * @licence MIT
 */
 class Controller
@@ -28,7 +27,7 @@ class Controller
 		$this->Sys->connect(DATADIRECTORY,'system','php');
 		$this->Msg->connect(DATADIRECTORY,'messages','php');
 
-		if(isset($_SESSION['username']) && get_class($this) != 'Message' && get_class($this) != 'System')
+		if(isset($_SESSION['username']) && get_class($this) != 'Message' && get_class($this) != 'System' && get_class($this) != 'Curriculum' )
 		{
 			$this->DB->connect(DATADIRECTORY,$_SESSION['username'],$ext);
 		}
@@ -36,14 +35,14 @@ class Controller
 		{
 			$this->DB->connect(DATADIRECTORY,$file,$ext);
 		}
-		//Delete doublon in sys files table
+		//Delete duplicates in sys files table
 		$table = $this->Sys->id_table('files');
 		$column = $this->Sys->id_column($table,'file');
-		$this->Sys->del_doublon($table,$column);
-		//Delete doublon in sys table tables
+		$this->Sys->del_duplicates($table,$column);
+		//Delete duplicates in sys table tables
 		$table = $this->Sys->id_table('tables');
 		$column = $this->Sys->id_column($table,'strtable');
-		$this->Sys->del_doublon($table,$column);
+		$this->Sys->del_duplicates($table,$column);
 		
 		$configs=$this->Sys->table('configs');
 		//model public function id_table($table,$strColumn)
@@ -75,6 +74,7 @@ class Controller
 		$this->get_message();
 		// LEFT
 		$this->data['tables'] = $this->DB->tables();
+
 		$this->data['left'] = $this->Template->load('left',$this->data,TRUE);
 		// FOOTER
 		$this->data['footer'] = $this->Template->load('footer', $this->data,TRUE);
@@ -266,7 +266,7 @@ class Controller
 	}
 	function show_table($url)
 	{
-		$debut = microtime(true)*1000;
+		$debut = microtime(true);
 
 		if(isset($url[TABLE]) && $this->DB->table_exists($url[TABLE]))
 		{
@@ -417,7 +417,7 @@ class Controller
 			$pg = (isset($_GET['page'])?$_GET['page']:1);
 			$this->data['tbody'] = $page[$pg];
 		}
-		$fin = microtime(true)*1000;
+		$fin = microtime(true);
 		$this->data['performance'] = $fin-$debut;
 		$this->data['content'] = $this->Template->load('tables', $this->data,TRUE);
 		//LAYOUT
@@ -709,7 +709,7 @@ class Controller
 		}
 		header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 	}
-	function delete_doublons($url)
+	function delete_duplicates($url)
 	{
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
@@ -718,8 +718,8 @@ class Controller
 		{
 			$table = $this->DB->id_table($strTable);
 			$column = @$this->DB->id_column($strTable,$post['strfield']);
-			@$this->DB->del_doublon($table,$column);
-			$this->Msg->set_msg("You deleted doublons from the table: ".$url[TABLE]);
+			@$this->DB->del_duplicates($table,$column);
+			$this->Msg->set_msg("You deleted duplicates  from the table: ".$url[TABLE]);
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
 		}
@@ -728,16 +728,16 @@ class Controller
 			$this->Msg->set_msg($t->getMessage());
 		}
 		$this->get_message();
-		$this->data['legend'] = 'Delete doublons in the table: '.$strTable ;
-		$this->data['placeholder'] = 'Delete doublons';
+		$this->data['legend'] = 'Delete duplicates  in the table: '.$strTable ;
+		$this->data['placeholder'] = 'Delete  duplicates';
 
 		$this->data['columns'] = $this->actions;
 
-		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Use this column to identify doublons.');
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Use this column to identify duplicates.');
 	
 		$this->data['table'] = $this->DB->id_table($strTable);
-		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/delete_doublons/'.$strTable;
-		$this->data['content'] = $this->Template->load('del-doublons', $this->data,TRUE);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/delete_duplicates/'.$strTable;
+		$this->data['content'] = $this->Template->load('del-duplicates', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
 	function show($url)
@@ -1862,31 +1862,50 @@ class Controller
 	
 	function ini()
 	{
-		$this->DB->initialize();
-		//For tables list
-		$idtab = $this->Sys->id_table('tables');
-		$this->Sys->empty_table($idtab);
-
-		$this->Msg->set_msg('You have initialized '.$this->data['title']);
-		header('Location:'.WEBROOT.strtolower(get_class($this)));
+			$answer = @$_POST['inlineRadioOptions'];
+			if(!isset($answer))
+			{
+				$refaction = WEBROOT.strtolower(get_class($this)).'/ini';
+				$this->question('Are you sure you want to initialize the database ? '.$this->colorize('everything will be erase except table rules ! ','red'),$refaction);
+				exit;
+			}
+			elseif($answer == 'yes')
+			{
+				$this->DB->initialize();
+				//For tables list
+				$idtab = $this->Sys->id_table('tables');
+				$this->Sys->empty_table($idtab);
+				$this->Msg->set_msg('You have initialized '.$this->data['title']);
+			}
+			header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
 	function demo()
 	{
-		$this->DB->demo();
-		//For system tables list
-		$last = $this->Sys->last('tables');
-		$idtab = $this->Sys->id_table('tables');
-		$post['table'] = $idtab;
-		
-		$post['id_table'] = ++$last;
-		$post['strtable'] = 'users';
-		$this->Sys->add_line($post,'id_table');
-		
-		$post['id_table'] = ++$last;
-		$post['strtable'] = 'notes';
-		$this->Sys->add_line($post,'id_table');
-		
-		$this->Msg->set_msg('You have loaded demo data ');
+		$answer = @$_POST['inlineRadioOptions'];
+		if(!isset($answer))
+		{
+			$refaction = WEBROOT.strtolower(get_class($this)).'/demo';
+			$this->question('Are you sure you want to load the demo database ? '.$this->colorize('If it was a mistake try to load the last back-up ! ','red'),$refaction);
+			exit;
+		}
+		elseif($answer == 'yes')
+		{
+			$this->DB->demo();
+			//For system tables list
+			$last = $this->Sys->last('tables');
+			$idtab = $this->Sys->id_table('tables');
+			$post['table'] = $idtab;
+			
+			$post['id_table'] = ++$last;
+			$post['strtable'] = 'users';
+			$this->Sys->add_line($post,'id_table');
+			
+			$post['id_table'] = ++$last;
+			$post['strtable'] = 'notes';
+			$this->Sys->add_line($post,'id_table');
+			
+			$this->Msg->set_msg('You have loaded demo data ');
+		}
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
 	function load_last_bkp()
@@ -2130,12 +2149,12 @@ class Controller
 		 echo $val.'<br>';
 		}
 	}
-	function reflection()
+	function reflection($obj)
 	{
-		$oReflectionClass = new ReflectionClass(strtolower(get_class($this)));
+		$oReflectionClass = new \ReflectionClass(strtolower(get_class($obj)));
 		$this->data['methods'] = $oReflectionClass->getMethods();
-		$this->data['content'] = $this->Template->load('methods',$this->data,TRUE);
-		$this->Template->load('layout',$this->data);
+		return $this->Template->load('methods',$this->data,TRUE);
+		//$this->Template->load('layout',$this->data);
 	}
 }
 ?>

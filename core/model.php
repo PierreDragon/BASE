@@ -7,8 +7,8 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @version: 7.5
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2023-01-03 11:30
-* @add the namespace
+* @revision: 2023-01-12 00:19
+* @rename function delete_doublon for delete_duplicates
 * @change Throwable for \Exception
 * @licence MIT
 */
@@ -2246,11 +2246,11 @@ class Model
 		$this->save();
 	}
 	
-	public function del_doublon($table,$column)
+	public function del_duplicates($table,$column)
 	{
 		if(empty($column))
 		{
-			$msg = 'To delete doublons from a table. You need to identify the field you want to work with and '; 
+			$msg = 'To delete duplicates from a table. You need to identify the field you want to work with and '; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;

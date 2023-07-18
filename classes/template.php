@@ -1,6 +1,6 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
-* @class: Controller
+* @class: Template
 * @version:	8.9
 * @author: info@webiciel.ca
 * @php: 7.4

@@ -295,7 +295,7 @@ input[type=text]:placeholder {
 
     <!-- Login Form -->
    <form action="<?=$action?>" method="post">     
-      <caption>created by Webiciel®</caption>
+      <caption><strong>NO SQL PHP DATABASE</strong></caption>
 	  <input type="text" id="username" class="fadeIn second" name="username" placeholder="demo" value="demo">
       <input type="text" id="password" class="fadeIn third" name="password" placeholder="demo" value="demo"> 
       <input type="submit" class="fadeIn fourth" value="Log In">

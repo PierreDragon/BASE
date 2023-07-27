@@ -2,7 +2,6 @@
 $data[0][0][1]='rules';
 $data[0][0][2]='users';
 $data[0][0][3]='notes';
-$data[0][0][4]='agent';
 $data[1][0][1]='id_rule';
 $data[1][0][2]='master';
 $data[1][0][3]='slave';
@@ -37,7 +36,4 @@ $data[3][4][3]='2';
 $data[3][5][1]='5';
 $data[3][5][2]='note 5';
 $data[3][5][3]='3';
-$data[4][0][1]='tstestes';
-$data[4][0][2]='bouillle';
-$data[4][0][3]='coco';
 ?>

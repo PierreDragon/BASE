@@ -4,17 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 7.5
+* @version: 7.7
 * @author: info@webiciel.ca
-* @php: 7.4
-* @revision: 2023-01-12 00:19
-* @rename function delete_doublon for delete_duplicates
-* @change Throwable for \Exception
+* @php: 8
+* @revision: 2023-07-18 12:56
+* @ajout function pick et pick_where
 * @licence MIT
 */
 class Model
 {
-	public static $version = '7.5';
+	public static $version = '7.7';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -22,6 +21,11 @@ class Model
 	public $n_tables = 0;
 	public $max_lines = 0;
 	public $max_columns = 0;
+	public $id_table;
+	public $table;
+	public $primary;
+	public $table_nbrlines;
+	public $table_nbrcolumns;
 	
 	public function connect($path,$file,$ext='php')
 	{
@@ -280,12 +284,12 @@ class Model
 		
 		if( !$this->verif_alpha_underscore($strColumn) || empty($table) || empty($strColumn))
 		{
-			$msg = 'The fieldname must contain only alphabetic characters and <em>tablename_id</em> for foreign key.';
+			$msg = 'The fieldname must contain only alphabetic characters and <em>_id</em> suffix for foreign key.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
 		}
-		elseif(strstr($strColumn, '_') && !$this->valid_foreign_key($strColumn))
+		elseif(($this->right($strColumn, 3)=='_id') && !$this->valid_foreign_key($strColumn))
 		{
 			$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
 			$msg .= 'and must referencing an existing master in the rules table.';
@@ -658,16 +662,20 @@ class Model
 		$table = $post['table'];
 		$line = $post['line'];
 		unset($post['table'],$post['line']);
+		if(!is_numeric($table))
+		{
+			$table = $this->id_table($table);
+		}
 		$nbrCols = $this->count_columns($table);	
 		for($i=1;$i<=$nbrCols;$i++)
 		{
-			$flag=False;
+			$flag=false;
 			foreach($post as $strColumn=>$strValue)
 			{
 				$column = $this->id_column($table,$strColumn);
 				if($column == $i)
 				{
-					$flag=True;
+					$flag=true;
 					$strValue = strval(trim($strValue));
 					//$strValue = strval($strValue);
 					if($strValue || $strValue == 0 || $strValue == "0")
@@ -680,7 +688,7 @@ class Model
 					}
 				}
 			}
-			if($flag==False)
+			if($flag==false)
 			{
 				$this->data[$table][$line][$i] = '';
 			}
@@ -726,7 +734,7 @@ class Model
 			throw new \Exception($msg);
 		}
 	}
-	public function del_lines_where($strTable,$strColumn,$op='==',$multiple='',$strKeyCol)
+	public function del_lines_where($strTable,$strColumn,$op='==',$multiple='',$strKeyCol='')
 	{
 		//if(!$this->table_exists($strTable) || empty($strColumn) ||  empty($op) ||  empty($multiple) || empty($strKeyCol))
 		if(!$this->table_exists($strTable) || empty($strColumn) ||  empty($op) || empty($strKeyCol))
@@ -1029,7 +1037,7 @@ class Model
 		}*/
 		return $return;
 	}
-	public function where($strTable,$strColumn,$op='==',$value)
+	public function where($strTable,$strColumn,$op='==',$value='')
 	{
 		return $this->where_multiple($strTable,$strColumn,$op,$value);
 	}
@@ -1078,7 +1086,6 @@ class Model
 	
 	public function escape(&$mixed)
 	{
-		// Remplace ' par &#039;, < par &lt; , > par &gt;
 		if (is_array($mixed))
 		{
 			foreach($mixed as $key => $value)
@@ -1089,7 +1096,6 @@ class Model
 				$mixed[$key] = preg_replace("/>/", "&gt;", $mixed[$key]);
 				$mixed[$key] = str_replace("\\", "&#092;", $mixed[$key]);
 				$mixed[$key] = str_replace("/", "&#047;", $mixed[$key]);
-				//$mixed[$key] = str_replace("à", "&agrave;", $mixed[$key]);
 			}
 		}
 		else
@@ -1100,7 +1106,6 @@ class Model
 			$mixed = preg_replace("/>/", "&gt;", $mixed);
 			$mixed = str_replace("\\", "&#092;", $mixed);
 			$mixed = str_replace("/", "&#047;", $mixed);
-			//$mixed = str_replace("à", "&agrave;", $mixed);
 		}
 	}
 	/**
@@ -1121,7 +1126,6 @@ class Model
 				$mixed[$key] = preg_replace("/&gt;/", ">", $mixed[$key]);
 				$mixed[$key] = str_replace("&#092;", "\\", $mixed[$key]);
 				$mixed[$key] = str_replace("&#047;","/", $mixed[$key]);
-				//$mixed[$key] = str_replace("&agrave;", "&agrave;", $mixed[$key]);
 			}
 		}
 		else
@@ -1131,7 +1135,6 @@ class Model
 			$mixed = preg_replace("/&gt;/", ">", $mixed);
 			$mixed = str_replace("&#092;", "\\", $mixed);
 			$mixed = str_replace("&#047;","/", $mixed);
-			//$mixed = str_replace("&agrave;", "&agrave;", $mixed);
 		}
 	}
 	
@@ -1144,21 +1147,7 @@ class Model
 		}
 		return true;
 	}
-	function set_type($value)
-	{
-		if(is_numeric($value))
-		{
-			if(is_int($value))
-			{
-				$value = (int)$value;
-			}
-			elseif(is_float($value))
-			{
-				$value = (float)$value;
-			}
-		}
-		return $value;
-	}
+
 	function record($strTable,$line)
 	{
 		$idTable = $this->id_table($strTable);
@@ -1167,6 +1156,28 @@ class Model
 		if($lines)
 		{
 			return $this->combine($columns,$lines);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	function records($table)
+	{
+		$records = [];
+		if(!is_numeric($table))
+		{
+			$table = $this->id_table($table);
+		}
+		if(isset($this->data[$table]))
+		{
+			$columns = $this->columns($table);
+			foreach($this->data[$table] as $i=>$rec)
+			{
+				if($i == 0) continue;
+				$records[$i] = $this->combine($columns,$rec);
+			}
+			return $records;
 		}
 		else
 		{
@@ -1189,7 +1200,7 @@ class Model
 		}
 		return $select[$id];
 	}
-	function select_where(array $columns,$strTable,$strColumn,$op='==',$value)
+	function select_where(array $columns,$strTable,$strColumn,$op='==',$value='')
 	{
 		$id = $this->id_table($strTable);
 		$cols = $this->columns($id);
@@ -1213,32 +1224,92 @@ class Model
 		}
 		return $select[$id];
 	}
-	function sum($strTable,$strColumnToSum,$strColumn,$intKey)
+	function pick(array $columns,$strTable)
+	{
+		$id = $this->id_table($strTable);
+		$cols = $this->columns($id);
+		$columns = $this->filter_columns($cols,$columns);		
+		$select = array();
+		$result = array();
+		$records = $this->table($strTable);
+		foreach($records as $i=>$record)
+		{
+			foreach($columns as $c=>$col)
+			{
+				$select[$id][$i][$c] = $this->data[$id][$i][$c];		
+			}	
+			$result[$i] = $this->combine($columns,$select[$id][$i]);
+		}
+		return $result;
+	}
+	function pick_where(array $columns,$strTable,$strColumn,$op='==',$value='')
+	{
+		$id = $this->id_table($strTable);
+		$cols = $this->columns($id);
+		$columns = $this->filter_columns($cols,$columns);
+		$select = array();
+		$result = array();
+		$records = $this->where($strTable,$strColumn,$op,$value);
+		foreach($records as $i=>$record)
+		{
+			foreach($columns as $c=>$col)
+			{
+				$select[$id][$i][$c] = $this->data[$id][$i][$c];		
+			}	
+			$result[$i] = $this->combine($columns,$select[$id][$i]);
+		}
+		return $result;
+	}
+	function sum($strTable,$strColumnToSum,$strColumn=null,$intKey=null)
 	{
 		$sum = 0;
 		$intTable = $this->id_table($strTable);
 		$columnToSum = $this->id_column($intTable,$strColumnToSum);
-		$column = $this->id_column($intTable,$strColumn);
-		foreach( $this->data[$intTable] as $realID=>$record )
+		if(! is_null($intKey))
 		{
-			if($record[$column] == $intKey)
+			$column = $this->id_column($intTable,$strColumn);
+			foreach( $this->data[$intTable] as $realID=>$record )
 			{
+				if($realID==0) continue;
+				if($record[$column] == $intKey)
+				{
+					$sum += $record[$columnToSum];  				
+				}
+			}
+		}
+		else
+		{
+			foreach( $this->data[$intTable] as $realID=>$record )
+			{
+				if($realID==0) continue;
 				$sum += $record[$columnToSum];  				
 			}
 		}
 		return $sum;
 	}
 
-	function sub($strTable,$strColumnToSub,$strColumn,$intKey)
+	function sub($strTable,$strColumnToSub,$strColumn=null,$intKey=null)
 	{
 		$sub = 0;
 		$intTable = $this->id_table($strTable);
 		$columnToSub = $this->id_column($intTable,$strColumnToSub);
-		$column = $this->id_column($intTable,$strColumn);
-		foreach( $this->data[$intTable] as $realID=>$record )
+		if(! is_null($intKey))
 		{
-			if($record[$column] == $intKey)
+			$column = $this->id_column($intTable,$strColumn);
+			foreach( $this->data[$intTable] as $realID=>$record )
 			{
+				if($realID==0) continue;
+				if($record[$column] == $intKey)
+				{
+					$sub -= $record[$columnToSub];  				
+				}
+			}
+		}
+		else
+		{
+			foreach( $this->data[$intTable] as $realID=>$record )
+			{
+				if($realID==0) continue;
 				$sub -= $record[$columnToSub];  				
 			}
 		}
@@ -1436,13 +1507,15 @@ class Model
 	}
 	function valid_date($string,$format,$time=false)
 	{
+		//var_dump($format); exit;
+		$this->unescape($string);
 		$gyear = 39;
-		$date = new DateTime();
-		if($del = strpos($format,'-') > 0)
+		$date = new \DateTime();
+		if(str_contains($format,'-'))
 		{
 			$del ='-';
 		}
-		elseif($del = strpos($format,'/') > 0)
+		elseif(str_contains($format,'/'))
 		{
 			$del = '/';
 		}
@@ -1461,14 +1534,12 @@ class Model
 					$year = $prefixyear.$array[2];
 					$month = $array[0];
 					$day = $array[1];
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'MM'.$del.'DD'.$del.'YYYY':
 					$array = explode($del,$string);
 					$year = $array[2];
 					$month = $array[0];
 					$day = $array[1];
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'DD'.$del.'MM'.$del.'YY':
 					$array = explode($del,$string);
@@ -1476,14 +1547,12 @@ class Model
 					$year = $prefixyear.$array[2];
 					$month = $array[1];
 					$day = $array[0];
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'DD'.$del.'MM'.$del.'YYYY':
 					$array = explode($del,$string);
 					$year = $array[2];
 					$month = $array[1];
 					$day = $array[0];
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'YY'.$del.'MM'.$del.'DD':
 					$array = explode($del,$string);
@@ -1491,21 +1560,18 @@ class Model
 					$year = $prefixyear.$array[0];
 					$month = $array[1];
 					$day = $array[2];
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'YYYY'.$del.'MM'.$del.'DD':
 					$array = explode($del,$string);
 					$year = $array[0];
 					$month = $array[1];
 					$day = $array[2];
-					//$date->setDate($year,$month,$day);
 				break;
 				default:
 					$array = explode($del,$string);
 					$year = $array[0];
 					$month = $array[1];
 					$day = $array[2];
-					//$date->setDate($year,$month,$day);
 			}
 		}
 		else
@@ -1520,14 +1586,12 @@ class Model
 					$year = $this->right($string,2);
 					$prefixyear = ($year > $gyear)?'19':'20';
 					$year = $prefixyear.$year;
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'MMDDYYYY':
 					//('08262019','MMDDYYYY');
 					$month = $this->left($string,2);
 					$day = substr($string, -6, 2);				
 					$year = $this->right($string,4);
-					//$date->setDate($year,$month,$day);
 				break;
 				//DMY
 				case 'DDMMYY':
@@ -1537,14 +1601,12 @@ class Model
 					$year = $this->right($string,2);
 					$prefixyear = ($year > $gyear)?'19':'20';
 					$year = $prefixyear.$year;
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'DDMMYYYY':
 					//('21082019','DDMMYYYY');
 					$day = $this->left($string,2);
 					$month = substr($string, -6, 2);				
 					$year = $this->right($string,4);
-					//$date->setDate($year,$month,$day);
 				break;
 				//YMD
 				case 'YYMMDD':
@@ -1554,14 +1616,12 @@ class Model
 					$day = $this->right($string,2);
 					$prefixyear = ($year > $gyear)?'19':'20';
 					$year = $prefixyear.$year;
-					//$date->setDate($year,$month,$day);
 				break;
 				case 'YYYYMMDD':
 					//('20190826','YYYYMMDD');
 					$year = $this->left($string,4);
 					$month = substr($string, -4, 2);				
 					$day = $this->right($string,2);
-					//$date->setDate((int)$year,(int)$month,(int)$day);
 				break;
 				//MM
 				case 'MM':
@@ -1572,7 +1632,6 @@ class Model
 					$a_date = $year.'-'.$month.'-'.$day;
 					$darr = date("Y-m-t", strtotime($a_date));					
 					return $darr;
-					//$date->setDate((int)$year,(int)$month,(int)$day);
 				break;
 			}
 		}
@@ -1970,7 +2029,7 @@ class Model
 	{
 		if(empty($strTable) || empty($strColumn)  || empty($strToTable) || empty($strToField)  || empty($left) || empty($right) || empty($string) || empty($op))
 		{
-			$msg = 'PatNum 35 is the subscriber for Patients 35 and 36, so I need to make a new column in Patients for PrimarySub, lookup PatientNumber from Patients, match it to PatNum in PatIns, and then move the data in the Insured coumn [PatIns] into the PrimarySub column [Patients] based on the existence of a "P" in the InsOrd column [PatIns]'; 
+			$msg = 'PatNum 35 is the subscriber for Patients 35 and 36, so I need to make a new column in Patients for PrimarySub, lookup PatientNumber from Patients, match it to PatNum in PatIns, and then move the data in the Insured column [PatIns] into the PrimarySub column [Patients] based on the existence of a "P" in the InsOrd column [PatIns]'; 
 			if(!$this->table_exists($strTable) && !empty($strColumn))
 			{
 				$msg = 'Table '.$strToTable.' has not been imported yet.'; 
@@ -2250,10 +2309,18 @@ class Model
 	{
 		if(empty($column))
 		{
-			$msg = 'To delete duplicates from a table. You need to identify the field you want to work with and '; 
+			$msg = 'To delete duplicates from a table. You need to identify the field you want to work with'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
+		}
+		if(!is_numeric($table))
+		{
+			$table = $this->id_table($table);
+		}
+		if(!is_numeric($column))
+		{
+			$column = $this->id_column($table,$column);
 		}
 		$str=array();
 		$records = $this->get_table($table);
@@ -2273,7 +2340,20 @@ class Model
 		}
 		$this->repair_table($table);
 	}
-	
+	public function strtoint($table,$column=null)
+	{
+		$result = array();
+		if(!is_numeric($table))
+		{
+			$result['table'] = $this->id_table($table);
+		}
+		if(isset($column) && !is_numeric($column))
+		{
+			$result['column'] = $this->id_column($table,$column);
+		}
+		return $result;
+	}
+ 
 	public function check_system()
 	{
 		$i=1;
@@ -2354,7 +2434,7 @@ class Model
 	{
 		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
 		{
-			$msg = 'Copy text "Self" into this field when PatientNumber=Family; copy text "Other" into this field when PatientNumber<>Family'; 
+			$msg = 'Copy a text in a column provided it respects the key'; 
 			if(!$this->table_exists($strTable) && !empty($strColumn))
 			{
 				$msg = 'Table '.$strTable.' has not been imported yet.'; 

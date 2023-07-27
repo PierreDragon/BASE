@@ -1,8 +1,8 @@
 <?php 
 
-foreach($methods as $method)
+foreach($methods as $i=>$method)
 {
-	echo $method. '<br>';
+	echo 'class '.$method->class. ' function '.$method->name. '<br>';
 }
 
 ?>

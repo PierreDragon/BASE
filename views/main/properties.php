@@ -51,5 +51,6 @@
 
 	/* exemple : echo '<div><small><a href="'.WEBROOT.$controller.'/empty_table/'.$thead.'">Empty the current table</a></small></div>';*/
 	?>
+	
 	</div>
 </div>

@@ -256,6 +256,43 @@ class Template
 			return $tbody;
 		}
 	}
+	
+	public function html_table_recursive($records,$class='')
+	{	
+		if(isset($records))
+		{
+			$tbody = '<table class="'.$class.'">';
+			foreach($records as $key=>$rec)
+			{
+				$tbody .= '<tr>';
+				$tbody .= '<th>'.$key.'</th>';
+				if(is_array($rec))
+				{
+					foreach($rec as $col=>$value)
+					{
+						$tbody .= '<th>'.$col.'</th>';
+						if(is_array($value))
+						{
+							$tabl = $this->html_table_recursive($value);
+							$tbody .= '<td>'.$tabl .'</td>';
+						}
+						else
+						{
+							$tbody .= '<td>'.$value.'</td>';
+						}
+					}
+				}
+				else
+				{
+					$tbody .= '<td>'.$rec.'</td>';
+				}
+				$tbody .= '</tr>';
+			}
+			$tbody .='</table>';
+			return $tbody;
+		}
+		
+	}
 	public function escape(&$mixed)
 	{
 		// Remplace ' par &#039;, < par &lt; , > par &gt;
@@ -315,6 +352,7 @@ class Template
 		}
 	}
 } 
+
 /* Location: ./classes/template.php */
 
 ?>

@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@100&display=swap');
+
+body
+{
+	font-family: 'Roboto Flex', sans-serif;
+}
+#navigation, #menuleft, #com, .note, #accordion, #footer, #div-copyright, #interet, #formation-continue 
+{ 
+	display:none;
+}
+
+h3
+{
+	color:#006699;
+}
+h4>span
+{
+	font-size:smaller;
+	color:#303030;
+}
+.custom {
+width:100%; 
+resize: none;
+border-collapse: collapse;
+}
+
+.custom tr { border: 1px solid #e6f0ff; padding:1px;}
+
+a 
+{
+	color:black;
+	text-decoration:none;
+}

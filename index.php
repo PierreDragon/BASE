@@ -2,10 +2,12 @@
 declare(strict_types=1);
 session_start();
 error_reporting(E_ALL);
-// Mettre display_errors : 1 ou off 
+// display_errors : 1 or off 
 ini_set("display_errors", "1");
-set_time_limit(180); //seconds
+set_time_limit(60); //seconds
 date_default_timezone_set('America/New_York'); 
+
+define('VERSION','2.0');
 define('WEBROOT',str_replace('index.php','',$_SERVER['SCRIPT_NAME']));
 define('ROOT',str_replace('index.php','',$_SERVER['SCRIPT_FILENAME']));
 define('DEFAULTCONTROLLER','main');
@@ -22,7 +24,6 @@ define('LINE',2);
 define('FIELD',3);
 define('INDEX',3);
 define('VALUE',4);
-define('VERSION','2.0');
 
 require(ROOT.'core/model.php');
 require(ROOT.'core/controller.php');

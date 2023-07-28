@@ -41,20 +41,6 @@ class About extends Core\Controller
 		// LAYOUT
 		$this->Template->load('layout', $this->data);
 	}
-	/*function test3d()
-	{
-		//parent::index();
-		// ARTICLE
-		$this->data['content'] = $this->oldtech($this->data['numtables'] ,$this->data['maxlines'] ,$this->data['maxcols'] );
-		//.aside-1
-		$this->data['reflectionl'] = $r = $this->reflection($this);
-		$this->data['left'] = $this->Template->load('left',$this->data,TRUE);
-		//.aside-2
-		$this->data['reflectionr'] = $this->reflection($this->DB);
-		$this->data['right'] = $this->Template->load('right',$this->data,TRUE);
-		// LAYOUT
-		$this->Template->load('layout', $this->data);
-	}*/
 	function oldtech($x,$y,$z)
 	{ 
 			$html = '<h1>Actual database <small> :  '.$_SESSION['username'].'.php</small></h1>';

@@ -730,6 +730,18 @@ class Controller
 		$this->data['content'] = $this->Template->load('del-duplicates', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+	function set_cell($url)
+	{
+		if (is_array($_POST['value']))
+		{
+			echo implode(', ', $_POST['value']);
+		} 
+		else
+		{
+			echo $_POST['value'];
+		}
+		$this->DB->set_cell($url[TABLE],$url[INDEX],$url[VALUE],$_POST['value']);
+	}
 	function show($url)
 	{
 		$debut = microtime(true)*1000;

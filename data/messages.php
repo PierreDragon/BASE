@@ -42,4 +42,8 @@ $data[1][19][1]='You have added the field: action to the table: actions';
 $data[1][19][2]='2023-07-21 09:48:08';
 $data[1][20][1]='You have loaded demo data';
 $data[1][20][2]='2023-07-21 09:50:55';
+$data[1][21][1]='You are logged in! demo';
+$data[1][21][2]='2023-07-27 10:23:13';
+$data[1][22][1]='You are logged in! pierre';
+$data[1][22][2]='2023-07-27 10:25:00';
 ?>

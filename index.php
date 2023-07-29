@@ -40,7 +40,7 @@ if (isset($_GET['jumbo'])) {$_SESSION['jumbo'] = $_GET['jumbo'];}
 $url ='';
 if(isset($_GET['url']))
 {
-    $url = @explode('/',$_GET['url']);
+	$url = @explode('/',$_GET['url']);
 }
 // - Add a default controller to avoid errors
 // - in case the controller is not specified in the URL.

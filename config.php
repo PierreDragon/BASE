@@ -2,7 +2,7 @@
 declare(strict_types=1);
 session_start();
 error_reporting(E_ALL);
-ini_set("display_errors", "1"); // display_errors : 1 or off 
+ini_set("display_errors", "0"); // display_errors : 0 or 1
 set_time_limit(60); //seconds
 date_default_timezone_set('America/New_York'); 
 

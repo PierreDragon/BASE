@@ -2,12 +2,14 @@
 declare(strict_types=1);
 session_start();
 error_reporting(E_ALL);
-ini_set("display_errors", "0"); // display_errors : 0 or 1
+ini_set("display_errors", "1"); // display_errors : 0 or 1
 set_time_limit(60); //seconds
 date_default_timezone_set('America/New_York'); 
 
 define('VERSION','2.0');
 define('ROOT',__DIR__.DIRECTORY_SEPARATOR);
+// Ensure the current directory is pointing to the front controller's directory
+chdir(ROOT);
 define('DEFAULTCONTROLLER','main');
 define('DEFAULTDATABASE','data');
 define('CLASSDIRECTORY',ROOT.'classes/');

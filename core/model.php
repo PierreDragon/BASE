@@ -50,7 +50,7 @@ class Model
 			$this->save();
 		}
 	}
-	public function version(): string
+	public static function version(): string
     {
 		return self::$version;
 	}	

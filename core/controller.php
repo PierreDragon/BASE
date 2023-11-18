@@ -298,6 +298,7 @@ class Controller
 			$p=0;
 			$tbody ='';
 			$page[1]='';
+			$nombre[1] = ''; 
 			foreach($records as $key=>$t)
 			{
 				if($key < $this->data['offset']) continue; 
@@ -306,10 +307,10 @@ class Controller
 				{
 					$p+=1;
 					$page[$p] = $tbody;
+					$nombre[$p] = $this->data['showlimit'];
 					$tbody='';
-					$x=0;
-				}
-				
+					$x=1;
+				}			
 				$tbody .= '<tr id="tr'.$key.'">';
 				$i = 0;
 				foreach($t as $k=>$value)
@@ -400,11 +401,11 @@ class Controller
 
 				$tbody .='<td><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
 				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.$this->data['controller'].'/delete_record/'.$this->data['thead'].'/'.$key.' ">delete</a></td>';
-
 				$tbody .= '</tr>';
 			}
 			//$this->data['tbody'] = $tbody;
 			$page[$p+1] = $tbody;
+			$nombre[$p+1] = $x;
 			$end = count($page);
 			$pagination = '<a href="'.WEBROOT.$this->data['controller'].'/show_table/'.$this->data['thead'].'?page=1">&laquo;</a>';
 			foreach($page as $i=>$pag)
@@ -416,6 +417,7 @@ class Controller
 			$this->data['page'] = $page;
 			$pg = (isset($_GET['page'])?$_GET['page']:1);
 			$this->data['tbody'] = $page[$pg];
+			$this->data['nombre'] = $nombre[$pg];
 		}
 		$fin = microtime(true);
 		$this->data['performance'] = $fin-$debut;
@@ -768,6 +770,7 @@ class Controller
 			$p=0;
 			$tbody ='';
 			$page[1]='';
+			$nombre[1] = ''; 
 			foreach($records as $key=>$t)
 			{
 				if($key < $this->data['offset']) continue; 
@@ -776,8 +779,9 @@ class Controller
 				{
 					$p+=1;
 					$page[$p] = $tbody;
+					$nombre[$p] = $this->data['showlimit'];
 					$tbody='';
-					$x=0;
+					$x=1;
 				}
 				$tbody .= '<tr>';
 				$i = 0;
@@ -859,6 +863,7 @@ class Controller
 			}
 			//$this->data['tbody'] = $tbody;
 			$page[$p+1] = $tbody;
+			$nombre[$p+1] = $x;
 			$end = count($page);
 			$pagination = '<a href="'.WEBROOT.$this->data['controller'].'/show_table/'.$this->data['thead'].'?page=1">&laquo;</a>';
 			foreach($page as $i=>$pag)
@@ -870,6 +875,7 @@ class Controller
 			$this->data['page'] = $page;
 			$pg = (isset($_GET['page'])?$_GET['page']:1);
 			$this->data['tbody'] = $page[$pg];
+			$this->data['nombre'] = $nombre[$pg];
 		}
 		else
 		{

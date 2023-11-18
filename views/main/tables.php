@@ -49,7 +49,7 @@
 		echo '<tbody id="myTable" class="row_drag">';
 	}
 	echo $tbody;
-	echo '<tr id="exec"><th colspan="'.($nbrcolonne+2).'"><span>Execution time : '.number_format($performance,2).' sec.</span></th></tr>';
+	echo '<tr id="exec"><th>Records: '.$nombre.'</th><th style="text-align:right" colspan="'.($nbrcolonne+1).'"><span>Execution time: '.number_format($performance,2).' sec.</span></th></tr>';
 	echo '</tbody>';
 	echo '</table>';
 	echo '</div>';

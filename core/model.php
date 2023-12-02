@@ -4,11 +4,11 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 7.7
+* @version: 7.8
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2023-07-18 12:56
-* @ajout function pick et pick_where
+* @revision: 2023-12-02 11:24
+* @optimisation function check_rule appel recurrent pour les sous-dependances
 * @licence MIT
 */
 class Model
@@ -1426,6 +1426,9 @@ class Model
 						{
 							foreach($records as $line=>$record)
 							{
+								//$this->preprint($records);
+								// Last update 2023-12-02
+								$this->check_rule($strSlave,$line);
 								unset($this->data[$idSlave][$line]);
 							}
 							$this->repair_table($idSlave);

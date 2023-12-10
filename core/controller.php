@@ -110,7 +110,7 @@ class Controller
 			$strTable = $this->DB->remove_accents($strTable);
 			if($this->DB->add_table($strTable))
 			{
-				//For system tables list
+			//For system tables list 
 				$last = $this->Sys->last('tables');
 				$idtab = $this->Sys->id_table('tables');
 				$post['table'] = $idtab;

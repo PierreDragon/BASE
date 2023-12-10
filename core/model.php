@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 7.8
+* @version: 7.9
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2023-12-02 11:24
-* @optimisation function check_rule appel recurrent pour les sous-dependances
+* @revision: 2023-12-10 11:33
+* @optimisation function remove_accents avoid null to the pass string
 * @licence MIT
 */
 class Model
 {
-	public static $version = '7.7';
+	public static $version = '7.9';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -2574,9 +2574,13 @@ class Model
 	}	
 	public function remove_accents($string) 
 	{
-		if ( !preg_match('/[\x80-\xff]/', $string) )
-			return $string;
-
+		if(!empty($string))
+		{
+			if ( !preg_match('/[\x80-\xff]/', $string) )
+			{
+				return $string;
+			}
+		}
 		$chars = array(
 		// Decompositions for Latin-1 Supplement
 		chr(195).chr(128) => 'A', chr(195).chr(129) => 'A',
@@ -2674,8 +2678,10 @@ class Model
 		chr(197).chr(190) => 'z', chr(197).chr(191) => 's'
 		);
 
-		$string = strtr($string, $chars);
-
+		if(!empty($string))
+		{
+			$string = strtr($string, $chars);
+		}
 		return $string;
 	}
 }

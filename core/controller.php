@@ -927,7 +927,7 @@ class Controller
 		$html  = '<div class="form-group">';
 		$label = (isset($label))?$label:$selectName;
 		$html .= '<label for="'.$selectName.'">'.$label.'</label>';
-		$html .= '<select class="form-control input-sm" name="'.$selectName.'">';
+		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'">';
 		$str='';
 		$selected='';
 

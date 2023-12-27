@@ -1947,12 +1947,14 @@ class Controller
 		rsort($files, SORT_NATURAL | SORT_FLAG_CASE);
 		foreach ($files as $key => $val)
 		{
+			//DEFAULTDATABASE
 			$pos = strripos($val, $_SESSION['username']);
+			//$pos = strripos($val, DEFAULTDATABASE);
 
 			if ($pos === false)
 			{
-				//echo "Sorry, we did not find ".DEFAULTDATABASE.'.php <br>';
 				$this->Msg->set_msg('Sorry, we did not find '.$_SESSION['username'].'.php');
+				//$this->Msg->set_msg('Sorry, we did not find '.DEFAULTDATABASE.'.php');
 			}
 			else
 			{
@@ -1963,6 +1965,7 @@ class Controller
 				{
 					rename( DATADIRECTORY.$val,DATADIRECTORY.$sfile[0].'.php');
 					$this->DB->connect(DATADIRECTORY,$_SESSION['username'],'php');
+					//$this->DB->connect(DATADIRECTORY,DEFAULTDATABASE,'php');
 					break;
 				}
 			}

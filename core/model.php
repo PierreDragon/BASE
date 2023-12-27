@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 7.9
+* @version: 8.1
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2023-12-10 11:33
-* @optimisation function remove_accents avoid null to the pass string
+* @revision: 2023-12-27 12:14
+* @addition of BETWEEN operator in all functions with an OP
 * @licence MIT
 */
 class Model
 {
-	public static $version = '7.9';
+	public static $version = '8.1';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -1017,6 +1017,21 @@ class Model
 							$return[$realID] = $record;
 						}
 					break;*/
+					
+					case 'BETWEEN':
+							if( str_contains($multiple,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$multiple);
+							if($record[$column] >= $test[0] && $record[$column] <= $test[1])
+							{
+								$return[$realID] = $record; 
+							}
+					break;
 					case 'LIKE':
 							if(stripos($record[$column],$multiple) !== false)
 							{
@@ -2010,6 +2025,20 @@ class Model
 								$this->data[$totable][$i][$tofield] = $this->data[$table][$i][$column];  
 							}
 						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$totable][$i][$tofield] = $this->data[$table][$i][$column];  
+							}
+						break;
 						case 'LIKE':
 							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
 							{
@@ -2460,6 +2489,7 @@ class Model
 			throw new \Exception($msg);
 			exit;
 		}
+		
 		if(empty($value))
 		{
 			$value = '';
@@ -2535,6 +2565,20 @@ class Model
 								$this->data[$table][$i][$column] = $text;  
 							}
 						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$table][$i][$column] = $text;  
+							}
+						break;
 						case 'LIKE':
 							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
 							{

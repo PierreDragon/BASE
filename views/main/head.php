@@ -10,6 +10,10 @@
 <meta name="author" content="<?php echo (isset($author))? $author:"$author"; ?>">
 <meta name="keywords" content="<?php echo (isset($keywords))? $keywords:"$keywords"; ?>">
 <link rel="icon" type="image/ico" href="<?php echo WEBROOT; ?>favicon.ico">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 <?php
 if(!empty($data)) extract($data);
 $path =(isset($path))? $path.'/' : '';
@@ -18,10 +22,6 @@ $path =(isset($path))? $path.'/' : '';
 <script type="text/javascript" src="<?=ASSETDIRECTORY?><?=$path?>js/myjavascript.js"></script>
 <script type="text/javascript" src="<?=ASSETDIRECTORY?><?=$path?>js/jquery.jeditable.js"></script>
 <script type="text/javascript" src="<?=ASSETDIRECTORY?><?=$path?>js/jquery-ui.min.js"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/bootstrap.css" media="screen">
 <link rel="stylesheet" href="<?=ASSETDIRECTORY?><?=$path?>css/nav.css" media="screen">
@@ -34,7 +34,7 @@ $(document).ready(function(){
 	$("#strtable").change(function(){
 		var stable = $(this).val();
 		$.ajax({
-			url: '/main/get_fields',
+			url: <?php echo WEBROOT ?> + '/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',
@@ -56,7 +56,7 @@ $(document).ready(function(){
 	$("#totable").change(function(){
 		var stable = $(this).val();
 		$.ajax({
-			url: '/main/get_fields',
+			url: <?php echo WEBROOT ?> + '/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',

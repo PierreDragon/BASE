@@ -21,7 +21,6 @@ class Main extends Core\Controller
 	function index()
 	{
 		parent::index();
-	}
-	
+	}	
 }
 ?>

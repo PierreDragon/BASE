@@ -34,7 +34,7 @@ $(document).ready(function(){
 	$("#strtable").change(function(){
 		var stable = $(this).val();
 		$.ajax({
-			url: <?php echo WEBROOT ?> + '/main/get_fields',
+			url: '/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',
@@ -49,6 +49,9 @@ $(document).ready(function(){
 
 					$("#strfield").append("<option value='"+col+"'>"+col+"</option>");
 				}
+			},
+			error: function(response) {
+			  console.log("ERROR: ", response);
 			}
 		});
 	});
@@ -56,7 +59,7 @@ $(document).ready(function(){
 	$("#totable").change(function(){
 		var stable = $(this).val();
 		$.ajax({
-			url: <?php echo WEBROOT ?> + '/main/get_fields',
+			url: '/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',
@@ -71,6 +74,9 @@ $(document).ready(function(){
 
 					$("#tofield").append("<option value='"+col+"'>"+col+"</option>");
 				}
+			},
+			error: function(response) {
+			  console.log("ERROR: ", response);
 			}
 		});
 	});

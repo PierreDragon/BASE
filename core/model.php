@@ -4,16 +4,17 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 8.1
+* @version: 8.2
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2023-12-27 12:14
-* @addition of BETWEEN operator in all functions with an OP
+* @review: 2023-12-27 12:14
+* @added: of BETWEEN operator in all functions with an OP
+* @added: function check_rule() to multiple deletions;	
 * @licence MIT
 */
 class Model
 {
-	public static $version = '8.1';
+	public static $version = '8.2';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -756,6 +757,8 @@ class Model
 			//Eliminate row of columns
 			if($i==0) continue;
 			$keys[] = $record[$column];
+			// New added 2023-12-27
+			$this->check_rule($strTable,$record[$column]);	
 		}
 		foreach($keys as $col)
 		{
@@ -1021,7 +1024,7 @@ class Model
 					case 'BETWEEN':
 							if( str_contains($multiple,',') == false )
 							{
-								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
 								exit;
@@ -2568,7 +2571,7 @@ class Model
 						case 'BETWEEN':
 							if(str_contains($value,',') == false )
 							{
-								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
 								exit;

@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	9.1
+* @version:	9.2
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2023-07-21 08:48
-* @delete function set_cell 
+* @revision: 2023-12-27 17:59
+* @added function tables_to_system()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '9.1';
+	public static $version = '9.2';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -2186,6 +2186,25 @@ class Controller
 		$this->data['methods'] = $oReflectionClass->getMethods();
 		return $this->Template->load('methods',$this->data,TRUE);
 		//$this->Template->load('layout',$this->data);
+	}
+	
+	function tables_to_system()
+	{
+		$tables = $this->DB->tables();
+		
+		foreach($tables as $strTable)
+		{
+			//echo $strTable;
+			$last = $this->Sys->last('tables');
+			$idtab = $this->Sys->id_table('tables');
+			$post['table'] = $idtab;
+			$post['id_table'] = $last+1;
+			$post['strtable'] = $strTable;
+			$this->Sys->add_line($post,'id_table');
+			$this->Msg->set_msg('You have transfered the table : '.$strTable.' to the system.');
+			sleep(1);
+		}
+		header('Location:'.WEBROOT);
 	}
 }
 ?>

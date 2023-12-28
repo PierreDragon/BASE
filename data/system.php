@@ -76,6 +76,10 @@ $data[4][1][1]='1';
 $data[4][1][2]='users';
 $data[4][2][1]='2';
 $data[4][2][2]='notes';
+$data[4][3][1]='3';
+$data[4][3][2]='rules';
+$data[4][4][1]='6';
+$data[4][4][2]='images';
 $data[5][0][1]='id_operator';
 $data[5][0][2]='operator';
 $data[5][0][3]='description';
@@ -284,6 +288,4 @@ $data[7][0][1]='id_historie';
 $data[7][0][2]='ipadress';
 $data[8][0][1]='id_file';
 $data[8][0][2]='file';
-$data[8][1][1]='1';
-$data[8][1][2]='logements.json';
 ?>

@@ -31,17 +31,22 @@ $path =(isset($path))? $path.'/' : '';
 <script>
 $(document).ready(function(){
 
+	// Base URLs:
+	//let baseUrl = "https://base.webiciel.ca";
+	//let base = new URL("/", baseUrl);
+	let baseUrl = "http://localhost/base";
+	let base = new URL("/base", baseUrl);
+
 	$("#strtable").change(function(){
 		var stable = $(this).val();
 		$.ajax({
-			url: '/main/get_fields',
+			url: base+'/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',
 			success:function(response){
 
 				var len = response.length;
-
 				$("#strfield").empty();
 				for( var i = 0; i<len; i++){
 					var id = response[i]['id'];
@@ -57,16 +62,16 @@ $(document).ready(function(){
 	});
 	
 	$("#totable").change(function(){
+
 		var stable = $(this).val();
 		$.ajax({
-			url: '/main/get_fields',
+			url: base+'/main/get_fields',
 			type: 'post',
 			data: {strtable:stable},
 			dataType: 'json',
 			success:function(response){
 
 				var len = response.length;
-
 				$("#tofield").empty();
 				for( var i = 0; i<len; i++){
 					var id = response[i]['id'];

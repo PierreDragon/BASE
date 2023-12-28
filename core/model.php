@@ -2167,6 +2167,20 @@ class Model
 								$this->data[$totable][$j][$tofield] = $this->data[$table][$i][$column];  
 							}
 						break;
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$totable][$i][$tofield] = $this->data[$table][$i][$column];  
+							}
+						break;
 						case 'LIKE':
 							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
 							{

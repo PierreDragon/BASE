@@ -1938,9 +1938,11 @@ class Controller
 		}
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
+
 	function load_last_bkp()
 	{
 		$dir = DATADIRECTORY;
+		$flag = false;
 		// Ouvre un dossier et liste tous les fichiers
 		if (is_dir($dir)) 
 		{
@@ -1954,32 +1956,37 @@ class Controller
 			}
 		}
 		rsort($files, SORT_NATURAL | SORT_FLAG_CASE);
+		
 		foreach ($files as $key => $val)
 		{
 			//DEFAULTDATABASE
 			$pos = strripos($val, $_SESSION['username']);
 			//$pos = strripos($val, DEFAULTDATABASE);
 
-			if ($pos === false)
+			if ($pos !== false)
 			{
-				$this->Msg->set_msg('Sorry, we did not find '.$_SESSION['username'].'.php');
-				//$this->Msg->set_msg('Sorry, we did not find '.DEFAULTDATABASE.'.php');
-			}
-			else
-			{
-			$str = "Found! file [$val] : type [". filetype($dir . $val) ."]";
-				$this->Msg->set_msg($str);
+				$flag = true;
+				//$str = "Found! file [$val] : type [". filetype($dir . $val) ."]";
+				//$this->Msg->set_msg($str);
 				$sfile = explode('.',$val);
 				if( strlen($sfile[1]) > 3 && $sfile[1] != 'html')
 				{
 					rename( DATADIRECTORY.$val,DATADIRECTORY.$sfile[0].'.php');
 					$this->DB->connect(DATADIRECTORY,$_SESSION['username'],'php');
 					//$this->DB->connect(DATADIRECTORY,DEFAULTDATABASE,'php');
+					$this->Msg->set_msg('You have loaded your last back-up! '.$val);
 					break;
+				}
+				else
+				{
+					$this->Msg->set_msg('Sorry, there is no more back-up! ');
 				}
 			}
 		}
-		$this->Msg->set_msg('You have loaded your last back-up!');
+		if ($flag === false)
+		{
+			$this->Msg->set_msg('Sorry, we did not find '.$_SESSION['username'].'.php');
+		}
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
 	function load_php($url)

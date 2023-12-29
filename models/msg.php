@@ -20,7 +20,10 @@ class Msg extends  Core\Model
 		$int = $this->count_lines(1)+1;
 		$post['table'] = 1;
 		$post['line'] = $int;
-		$post['user'] = $_SESSION['username'];
+		if(isset($_SESSION['username']))
+		{
+			$post['user'] = $_SESSION['username'];
+		}
 		$post['message'] = $string;
 		$post['datetime'] =  date("Y-m-d H:i:s",time());
 		if(!empty($string))

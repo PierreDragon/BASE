@@ -284,29 +284,28 @@ input[type=text]:placeholder {
 </style>
 <body>
 <div class="wrapper fadeInDown">
-  <div id="formContent">
-    <!-- Tabs Titles -->
+	<div id="formContent">
+		<!-- Tabs Titles -->
 
-    <!-- Icon -->
-    <div class="fadeIn first">
-	<h2><?=$titre?></h2><br>
-      <img src="<?=ASSETDIRECTORY.$path?>/img/logo.png" id="icon" alt="User Icon" />
-    </div>
+		<!-- Icon -->
+		<div class="fadeIn first">
+		<h2><?=$titre?></h2><br>
+		  <img src="<?=ASSETDIRECTORY.$path?>/img/logo.png" id="icon" alt="User Icon" />
+		</div>
 
-    <!-- Login Form -->
-   <form action="<?=$action?>" method="post">     
-      <caption><strong>NO SQL PHP DATABASE</strong></caption>
-	  <input type="text" id="username" class="fadeIn second" name="username" placeholder="demo" value="demo">
-      <input type="text" id="password" class="fadeIn third" name="password" placeholder="demo" value="demo"> 
-      <input type="submit" class="fadeIn fourth" value="Log In">
-    </form>
-	
-    <div id="formFooter">
-		<?php //echo (isset($msg))?$msg:''; ?>
-		<?php echo '<small>Current PHP version: ' . phpversion() . '</small>'; ?>
+		<!-- Login Form -->
+	   <form action="<?=$action?>" method="post">     
+		  <caption><strong>NO SQL PHP DATABASE</strong></caption>
+		  <input type="text" id="username" class="fadeIn second" name="username" placeholder="enter your base name" value="">
+		  <input type="text" id="password" class="fadeIn third" name="password" placeholder="enter your password" value=""> 
+		  <input type="submit" class="fadeIn fourth" value="Login">
+		</form>
+		<div id="formFooter">
+			<?php echo (isset($msg))?$msg:''; ?>
+			<?php //echo '<small>Current PHP version: ' . phpversion() . '</small>'; ?>
+			<a href="<?php echo WEBROOT.'login/create';	?>">Create my own database !</a>
+		</div>
 	</div>
-
-  </div>
 </div>
 </body>
 </html>

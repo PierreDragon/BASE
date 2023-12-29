@@ -1739,18 +1739,27 @@ class Controller
 		return json_encode($record);
 	}*/
 	function testcurl($url)
-	{
-		$url_name = "https://base.webiciel.ca/main/get/".$url[TABLE].'/'.$url[FIELD].'/'.$url[VALUE];
+	{ 
+		//$url = "https://base.webiciel.ca/main/get/".$url[TABLE].'/'.$url[FIELD].'/'.$url[VALUE];
+		$url = "https://base.webiciel.ca/main/get/pressions/id_pression/2";
+		//$url = 'https://core.ndax.io/v1/ticker';
 
-		$ch_session = curl_init();
+        // create curl resource
+        $ch = curl_init();
 
-		url_setopt($ch_session, CURLOPT_RETURNTRANSFER, 1);
+        // set url
+        curl_setopt($ch, CURLOPT_URL, $url);
 
-		curl_setopt($ch_session, CURLOPT_URL, $url);
+        //return the transfer as a string
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		$result_url = curl_exec($ch_session);
+        // $output contains the output string
+        $output = curl_exec($ch);
 
-		echo $result_url;
+		var_dump($output); 
+		
+        // close curl resource to free up system resources
+        curl_close($ch);      
 	}
 	function get($url)
 	{

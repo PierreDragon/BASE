@@ -81,14 +81,64 @@ class Login extends Core\Controller
 			$realID = $this->Sys->real_id($idTable,'id_user',$_SESSION['id_user']);
 			$this->Sys->set_cell($idTable,$realID,$colLoggedin,"0");
 		}		
-		$this->Msg->set_msg('You have logged out! ');
-		
+		//$this->Msg->set_msg('You have logged out! ');
+		$this->Msg->set_msg('Please provide a base name and a password!  | <a href="/login">Login</a>');
+		//$this->Msg->set_msg('Please provide a base name and a password!');
 		// remove all session variables
 		session_unset(); 
 		// destroy the session 
 		session_destroy();
 
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
+	}
+	
+	function create()
+	{
+		try
+		{
+			$post = @$_POST;
+			
+			$idTable = $this->Sys->id_table('users');
+			//$post['loggedin'] = TRUE;
+			$post['table'] = $idTable;
+			//var_dump($_POST); exit;
+			if(empty($post['username']) || empty($post['password']))
+			{
+				$this->Msg->set_msg('Please provide a base name and a password!  | <a href="/login">Login</a>');
+				//header('Location:'.WEBROOT.strtolower(get_class($this).'/create'));	
+				$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
+				$this->Template->load('login-create',$this->data);
+				exit;
+			}
+			elseif(file_exists(DATADIRECTORY.$post['username'].'.php'))
+			{
+				$this->Msg->set_msg('<strong style="color:tomato">This base already exists ! Choose another name.</strong> | <a href="/login">Login</a>');
+				/*$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
+				$this->Template->load('login-create',$this->data);*/
+				header('Location:'.WEBROOT.strtolower(get_class($this).'/create'));	
+				exit;
+			}
+			//SANITIZE
+			$post['username'] = strip_tags($post['username']);
+			$post['password'] = strip_tags($post['password']);
+			$post['password'] = trim(md5($post['password']));
+			$post['jumbo'] = "1"; 
+			$post['apikey'] = $post['password']; 
+			//var_dump($post); exit;
+			$this->Sys->add_line($post,'id_user');
+			$_SESSION = $post;
+				
+			$this->Msg->set_msg('You have created your base! '.$post['username']. ' | <a href="/login">Login</a>');
+			$controller = (file_exists(ROOT.'controllers/'.$post['username'].'.php'))?$post['username']:DEFAULTCONTROLLER;
+			header('Location:'.WEBROOT.$controller);						
+			exit;
+		}
+		catch(Exception $e)
+		{
+			$this->Msg->set_msg($e->getMessage());
+			$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
+			$this->Template->load('login-create',$this->data);
+		}
 	}
 }
 ?>

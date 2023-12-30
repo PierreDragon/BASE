@@ -1098,8 +1098,18 @@ class Model
 		$puts .= '?>';
 		$d=($backup)? date("Y-m-d",time()):'';
 
-		file_put_contents($this->datapath.$this->filename.$d,$puts,LOCK_EX);
-		return true;
+		$result = file_put_contents($this->datapath.$this->filename.$d,$puts,LOCK_EX);
+		if($result === false)
+		{
+			$msg = 'The file is locked.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+		}
+		else
+		{
+			$result = true;
+		}
+		return $result;
 	}
 	
 	public function escape(&$mixed)
@@ -2064,7 +2074,7 @@ class Model
 	{
 		if(empty($strTable) || empty($strColumn)  || empty($strToTable) || empty($strToField)  || empty($left) || empty($right) || empty($string) || empty($op))
 		{
-			$msg = 'PatNum 35 is the subscriber for Patients 35 and 36, so I need to make a new column in Patients for PrimarySub, lookup PatientNumber from Patients, match it to PatNum in PatIns, and then move the data in the Insured column [PatIns] into the PrimarySub column [Patients] based on the existence of a "P" in the InsOrd column [PatIns]'; 
+			$msg = 'See the image exemple below: Copied the Insured field from the [PatIns] table into the [Patients] table to a new previously created field called PrimarySub. Use [PatIns]PatNum and [Patients]PatientNumber to match records. Then add a condition to the [PatIns]InsOrd field which must specifically be an "A".'; 
 			if(!$this->table_exists($strTable) && !empty($strColumn))
 			{
 				$msg = 'Table '.$strToTable.' has not been imported yet.'; 

@@ -30,5 +30,5 @@
 	<button type="submit" class="btn btn-default">Copy column match condition !</button>
 </form>
 <hr>
-
-<img src="<?=ASSETDIRECTORY.$path?>/img/copycolumnkeys.png">
+<h5>Example:</h5>
+<img style="height: auto; width: auto; max-width: 995px; max-height: 995px;"  src="<?=ASSETDIRECTORY.$path?>/img/copycolumnkeys.png">

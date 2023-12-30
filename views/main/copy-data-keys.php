@@ -37,4 +37,4 @@
 </form>
 <hr>
 <h5>Example:</h5>
-<img src="<?=ASSETDIRECTORY.$path?>/img/copydatakeys.png">
+<img  style="height: auto; width: auto; max-width: 995px; max-height: 995px;"  src="<?=ASSETDIRECTORY.$path?>/img/copydatakeys.png">

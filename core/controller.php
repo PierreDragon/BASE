@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	9.2
+* @version:	10.0
 * @author: info@webiciel.ca
-* @php: 7.4
+* @php: 8
 * @revision: 2023-12-27 17:59
-* @added function tables_to_system()
+* @added function sum_column_where()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '9.2';
+	public static $version = '10.0';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -387,6 +387,14 @@ class Controller
 						$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).toggleClass(\'minresize\');" /></td>';
 						//$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).removeClass(\'maxresize\');" /></td>';
 					}
+					elseif($col == 'musique')
+					{
+						$tbody .= '<td><audio controls>
+										  <source src="horse.ogg" type="audio/ogg">
+										  <source src="'.ASSETDIRECTORY.'uploads/'.$value.' " type="audio/mpeg">
+										  Your browser does not support the audio tag.
+										</audio></td>';
+					}
 					else
 					{
 						$tbody .= '<td>'.$value.'</td>';
@@ -398,7 +406,15 @@ class Controller
 					$tbody .= '<td>-</td>';
 					$i++;
 				}
-
+				//$tbody .='<td><a title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/showoff/'.$this->data['thead'].'/'.$this->DB->primary.'/'.$key.' ">show</a></td>';
+				if($strTable == 'musimages')
+				{
+					$tbody .='<td><a type="button" class="btn btn-primary" title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">play</a></td>';
+				}
+				else
+				{
+					$tbody .='<td><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
+				}
 				$tbody .='<td><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
 				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.$this->data['controller'].'/delete_record/'.$this->data['thead'].'/'.$key.' ">delete</a></td>';
 				$tbody .= '</tr>';
@@ -570,6 +586,47 @@ class Controller
 		$this->data['content'] = $this->Template->load('fields',$this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+	function show_record($url)
+	{
+		$strTable=$url[TABLE];
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit;
+			}
+			//LEFT
+			$this->properties('left',$strTable);
+			$primary = $this->DB->column_name($strTable,1);
+			$this->Msg->set_msg("You have showed record at the table: $strTable");
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = "Show a record in the table: $strTable" ;
+		$this->data['placeholder'] = 'Show a record';
+		$this->data['columns'] = $this->DB->columns($strTable);
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['line'] = $url[INDEX];
+		$this->data['record'] = $this->DB->line($this->data['table'],$url[INDEX]);
+		foreach($this->data['columns'] as $key=>$col)
+		{
+			if(substr($col, -3, 1)=="_")
+			{
+				$tblList = stristr($col, '_', true).'s';
+				$strListColumns = $this->DB->columns($tblList);
+				//dropdown($cols,$strTable,$selectName,$value=null)
+				$value = $this->data['record'][$key];
+				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col,$value,null,'disabled');
+			}
+		}
+		$this->data['content'] = $this->Template->load('show-rec', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
+	
 	function add_record($url)
 	{
 		$strTable=$url[TABLE];
@@ -593,9 +650,15 @@ class Controller
 			{
 				$post['alt']=$post['image'] = @$this->fupload();
 			}
-			$this->DB->add_line($post,$this->DB->primary);
+			if($strTable == 'musiques')
+			{
+				$post['alt']=$post['musique'] = @$this->fupload_music();
+			}
+			$line = $this->DB->add_line($post,$this->DB->primary);
 			$this->Msg->set_msg("You have added a record to table: $strTable");
-			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
+			//header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
+			$pag = $last/$this->data['showlimit'] + 1;
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.(int)$pag.'#tr'.$line);
 			exit();
 		}
 		catch (\Exception $t)
@@ -638,7 +701,10 @@ class Controller
 			$primary = $this->DB->column_name($strTable,1);
 			$this->DB->set_line($post);
 			$this->Msg->set_msg("You have changed record $post[$primary] at the table: $strTable");
-			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
+			//header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
+			$n = $post['line']/$this->data['showlimit'];
+			$pag = ceil($n);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.(int)$pag.'#tr'.$post['line']);
 			//exit;
 		}
 		catch (\Exception $t)
@@ -857,6 +923,15 @@ class Controller
 					$tbody .= '<td>-</td>';
 					$i++;
 				}
+				//$tbody .='<td><a title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/showoff/'.$this->data['thead'].'/'.$this->DB->primary.'/'.$key.' ">show</a></td>';
+				if($strTable == 'musimages')
+				{
+					$tbody .='<td><a type="button" class="btn btn-primary" title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">play</a></td>';
+				}
+				else
+				{
+					$tbody .='<td><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
+				}
 				$tbody .='<td><a title="Edit this record ?"  href="'.WEBROOT.strtolower(get_class($this)).'/edit_record/'.$strTable.'/'.$key.' ">edit</a></td>';
 				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.strtolower(get_class($this)).'/delete_record/'.$strTable.'/'.$key.' ">delete</a></td>';
 				$tbody .= '</tr>';
@@ -908,7 +983,10 @@ class Controller
 	function bkp()
 	{
 		$this->DB->save(TRUE);
-		$this->Msg->set_msg('Your back-up is complete.');
+		$dat = date('Y-m-d H:i:s',time());
+		//$dat = str_replace(' ', '', $dat);
+		//$dat = str_replace(':', '', $dat);
+		$this->Msg->set_msg('Your back-up file: '.$this->DB->filename.' '.$dat.' is complete.');
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 		exit();
 	}
@@ -918,7 +996,7 @@ class Controller
 		print_r($res);
 		echo '</pre>';
 	}
-	function dropdown($cols,$strTable,$selectName,$value=null,$label=null)
+	function dropdown($cols,$strTable,$selectName,$value=null,$label=null,$disabled=null)
 	{
 		$rec = $this->DB->select($cols,$strTable);
 		//Désactive la ligne des noms de colonnes
@@ -927,7 +1005,7 @@ class Controller
 		$html  = '<div class="form-group">';
 		$label = (isset($label))?$label:$selectName;
 		$html .= '<label for="'.$selectName.'">'.$label.'</label>';
-		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'">';
+		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'" '.$disabled.'>';
 		$str='';
 		$selected='';
 
@@ -1398,6 +1476,97 @@ class Controller
 		$this->data['content'] = $this->Template->load('copy-text-where', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+	
+	function sum_column_where($url)
+	{
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		//var_dump($post); exit;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			// sum($strTable,$strColumnToSum,$strColumn=null,$intKey=null)
+			$result = @$this->DB->sum_column_where($strTable,$post['strfield'],$post['string'],$post['operator'],$post['value']);
+			$this->Msg->set_msg('You added up '.$this->colorize($post['strfield'],'tomato').' where '. $post['string'] . ' is '.$post['operator'].'  '.$post['value']. ' RESULT:' .$this->colorize(number_format($result,2,".",","),'tomato'));
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : Sum a column by matching condition.';
+		$this->data['placeholder'] = 'Sum a column by mathching condition ';
+
+		$this->data['columns'] = $this->actions;
+
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column',' : This column to sum');
+		$this->data['divstring'] = $this->Template->cdropdown($this->DB,$strTable,'string',NULL,FALSE,'where',' : The field that will serve for matching condition');
+		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE);
+		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/sum_column_where/'.$strTable;
+		$this->data['content'] = $this->Template->load('sum-column-where', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
+	
+	function math_column_where($url)
+	{
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			// sum($strTable,$strColumnToSum,$strColumn=null,$intKey=null)
+			$result = @$this->DB->math_column_where($strTable,$post['strfield'],$post['left'],$post['string'],$post['operator'],$post['value']);
+			$result = $this->set_format($result);
+			$this->Msg->set_msg('You '.$post['left'].' '.$this->colorize($post['strfield'],'tomato').' where '. $post['string'] . ' is '.$post['operator'].'  '.$post['value']. ' RESULT:' .$this->colorize($result,'tomato'));
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : Math a column by matching condition.';
+		$this->data['placeholder'] = 'Math a column by mathching condition ';
+
+		$this->data['columns'] = $this->actions;
+
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column',' : This column to math');
+		// dropdown($db,$strTable,$selectName,$retcol=1,$value=null,$header=false,$label=null,$help=null,$offset=0)
+		$this->data['listmaths'] = $this->Template->dropdown($this->Sys,'maths','left',2,NULL,FALSE,'math',' : List of available actions: Sum, Avg, Max, Min, Mdi (medium difference / fr. écart moyen)') ;
+		$this->data['divstring'] = $this->Template->cdropdown($this->DB,$strTable,'string',NULL,FALSE,'where',' : The field that will serve for matching condition');
+		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE);
+		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/math_column_where/'.$strTable;
+		$this->data['content'] = $this->Template->load('math-column-where', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
+	private function set_format($number)
+	{
+		if(is_float($number + 0))
+		{
+			$number = number_format($number,2,".",",");
+		}
+		return $number;
+	}
+	
 	function switch_column($url)
 	{
 		$strTable=$url[TABLE];
@@ -1879,6 +2048,83 @@ class Controller
 			{
 				$this->Msg->set_msg("The file ". htmlspecialchars( basename( $_FILES["image"]["name"])). " has been uploaded.");
 				return $_FILES["image"]["name"];
+			} 
+			else
+			{
+				$msg = 'Sorry, there was an error uploading your file.';
+				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+				throw new \Exception($msg);
+				//$this->Msg->set_msg("Sorry, there was an error uploading your file.");
+			}
+		}
+	}
+	public function fupload_music()
+	{
+		//$target_dir ='C:/xampp/htdocs/BASIC/assets/uploads/';
+		$target_dir =$_SERVER['DOCUMENT_ROOT'].ASSETDIRECTORY.'uploads/';
+		$target_file = $target_dir . basename($_FILES["musique"]["name"]);
+		$uploadOk = 1;
+		$imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+		// Check if image file is a actual image or fake image
+		if(isset($_POST["submit"]))
+		{
+			$check = filesize($_FILES["musique"]["tmp_name"]);
+			if($check !== false)
+			{
+				$this->Msg->set_msg( "File is a musique - " . $check["mime"] . ".");
+				$uploadOk = 1;
+			} 
+			else
+			{
+				$msg = 'File is not a musique.';
+				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+				throw new \Exception($msg);
+				//$this->Msg->set_msg("File is not an image.");
+				$uploadOk = 0;
+			}
+		}
+		// Check if file already exists
+		if (file_exists($target_file))
+		{
+			$msg = 'Sorry, file already exists.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//exit;
+			//$this->Msg->set_msg( "Sorry, file already exists.");
+			$uploadOk = 0;
+		}
+		// Check file size in Bytes
+		if ($_FILES["musique"]["size"] > 50000000) 
+		{
+			$msg = 'Sorry, your file is too large.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, your file is too large.");		 
+			$uploadOk = 0;
+		}
+		// Allow certain file formats
+		if($imageFileType != "mp3" && $imageFileType != "wav" && $imageFileType != "avi")
+		{
+			$msg = 'Sorry, only MP3, WAV & AVI files are allowed.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, only JPG, JPEG, PNG & GIF files are allowed.");	
+			$uploadOk = 0;
+		}
+		// Check if $uploadOk is set to 0 by an error
+		if ($uploadOk == 0) 
+		{
+			$msg = 'Sorry, your file was not uploaded.';
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			//$this->Msg->set_msg( "Sorry, your file was not uploaded.");	
+		} 
+		else 
+		{
+			if (move_uploaded_file($_FILES["musique"]["tmp_name"], $target_file)) 
+			{
+				$this->Msg->set_msg("The file ". htmlspecialchars( basename( $_FILES["musique"]["name"])). " has been uploaded.");
+				return $_FILES["musique"]["name"];
 			} 
 			else
 			{

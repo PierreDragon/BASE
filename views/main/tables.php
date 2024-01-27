@@ -36,6 +36,7 @@
 		}
 		echo'</th>';
 	}
+	echo '<th>show</th>';
 	echo '<th>edit</th>';
 	echo '<th>delete</th>';
 	echo '</tr>';
@@ -49,7 +50,7 @@
 		echo '<tbody id="myTable" class="row_drag">';
 	}
 	echo $tbody;
-	echo '<tr id="exec"><th>Records: '.$nombre.'</th><th style="text-align:right" colspan="'.($nbrcolonne+1).'"><span>Execution time: '.number_format($performance,2).' sec.</span></th></tr>';
+	echo '<tr id="exec"><th>Records: '.$nombre.'</th><th style="text-align:right" colspan="'.($nbrcolonne+2).'"><span>Execution time: '.number_format($performance,2).' sec.</span></th></tr>';
 	echo '</tbody>';
 	echo '</table>';
 	echo '</div>';

@@ -1,6 +1,7 @@
 <?php ?>
 <h1>What is BASE?</h1>
-<h3>BASE is a 3D array datafile management system (.php).</h3>
+<h3>BASE is a 3D matrix datafile management system (.php).</h3>
+<p>BASE allows you to manage data files without the need for an SQL server. It uses an efficient and robust algorithm, which guarantees speed, reliability and security of operations. BASE is a versatile computer program, which adapts to different types of data, such as texts, numbers, images or sounds. BASE is a computer program that simplifies users' lives by offering them a practical and efficient solution for managing their data files.</p>
 
 <h4>Data structure</h4>
 <p>All data is stored in a three-dimensional array. So, for each piece of data, a [table][row][column] coordinate.</p>

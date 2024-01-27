@@ -45,7 +45,6 @@ class Login extends Core\Controller
 					$this->Msg->set_msg('You are logged in! '.$post['username']);
 					
 					$controller = (file_exists(ROOT.'controllers/'.$post['username'].'.php'))?$post['username']:DEFAULTCONTROLLER;
-					//header('Location:'.WEBROOT.DEFAULTCONTROLLER);	
 					header('Location:'.WEBROOT.$controller);						
 					exit;
 				}
@@ -58,7 +57,7 @@ class Login extends Core\Controller
 			}
 			else
 			{
-				//$this->Msg->set_msg('Username not found!');
+				$this->Msg->set_msg('Create your own base ! | <a href="/login">Login</a>');
 				$this->data['action'] = WEBROOT.strtolower(get_class($this));
 				$this->Template->load('login',$this->data);
 			}
@@ -82,7 +81,7 @@ class Login extends Core\Controller
 			$this->Sys->set_cell($idTable,$realID,$colLoggedin,"0");
 		}		
 		//$this->Msg->set_msg('You have logged out! ');
-		$this->Msg->set_msg('Please provide a base name and a password!  | <a href="/login">Login</a>');
+		$this->Msg->set_msg('Please provide a base name and a password! | <a href="/login">Login</a>');
 		//$this->Msg->set_msg('Please provide a base name and a password!');
 		// remove all session variables
 		session_unset(); 
@@ -128,7 +127,7 @@ class Login extends Core\Controller
 			$this->Sys->add_line($post,'id_user');
 			$_SESSION = $post;
 				
-			$this->Msg->set_msg('You have created your base! '.$post['username']. ' | <a href="/login">Login</a>');
+			$this->Msg->set_msg('Congratulation ! You have created your base! <strong>'.$post['username']. '</strong> | <a href="/login">Login</a>');
 			$controller = (file_exists(ROOT.'controllers/'.$post['username'].'.php'))?$post['username']:DEFAULTCONTROLLER;
 			header('Location:'.WEBROOT.$controller);						
 			exit;

@@ -295,15 +295,16 @@ input[type=text]:placeholder {
 
 		<!-- Login Form -->
 	   <form action="<?=$action?>" method="post">     
-		  <caption><strong>NO SQL PHP DATABASE</strong></caption>
-		  <input type="text" id="username" class="fadeIn second" name="username" placeholder="enter your base name" value="">
-		  <input type="text" id="password" class="fadeIn third" name="password" placeholder="enter your password" value=""> 
+		  <caption><strong>NO SQL PHP DATAFILE</strong></caption>
+		  <input type="text" id="username" class="fadeIn second" name="username" placeholder="enter your base name"  required>
+		  <input type="text" id="password" class="fadeIn third" name="password" placeholder="enter your password"  required> 
 		  <input type="submit" class="fadeIn fourth" value="Login">
 		</form>
 		<div id="formFooter">
+			<?php //echo '<p style="font-weight:bold">Welcome to the database portal !</p>'; ?>
 			<?php echo (isset($msg))?$msg:''; ?>
 			<?php //echo '<small>Current PHP version: ' . phpversion() . '</small>'; ?>
-			<a href="<?php echo WEBROOT.'login/create';	?>">Create my own database !</a>
+			<a style="font-weight:bold" href="<?php echo WEBROOT.'login/create';	?>">Create my own base !</a>
 		</div>
 	</div>
 </div>

@@ -4,17 +4,19 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 8.2
+* @version: 8.5
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2023-12-27 12:14
-* @added: of BETWEEN operator in all functions with an OP
-* @added: function check_rule() to multiple deletions;	
+* @review: 2023-01-01 13:54
+* @added: BETWEEN operator in all functions with an OP
+* @added: operator in all functions with an OP
+* @added function math_column_where()
+* @added function increment_where()
 * @licence MIT
 */
 class Model
 {
-	public static $version = '8.2';
+	public static $version = '8.5';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -1035,6 +1037,23 @@ class Model
 								$return[$realID] = $record; 
 							}
 					break;
+					case 'LIST':
+							if(str_contains($multiple,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$multiple);
+							foreach($test as $tes)
+							{
+								if($record[$column] == $tes)
+								{
+									$return[$realID] = $record; 
+								}
+							}
+						break;
 					case 'LIKE':
 							if(stripos($record[$column],$multiple) !== false)
 							{
@@ -1096,8 +1115,14 @@ class Model
 		}
 		$puts .= PHP_EOL;
 		$puts .= '?>';
-		$d=($backup)? date("Y-m-d",time()):'';
-
+		$dat = date('Y-m-d H:i:s',time());
+		$dat = str_replace(' ', '', $dat);
+		$dat = str_replace(':', '', $dat);
+		$dat = str_replace('-', '', $dat);
+		$d=($backup)? $dat:'';
+/***/
+// OLD $d=($backup)? date("Y-m-d",time()):'';
+/***/
 		$result = file_put_contents($this->datapath.$this->filename.$d,$puts,LOCK_EX);
 		if($result === false)
 		{
@@ -1314,6 +1339,345 @@ class Model
 			}
 		}
 		return $sum;
+	}
+	
+	function math_column_where($strTable,$strColumn,$math, $string,$op='==',$value=null)
+	{
+		if(empty($strTable) || empty($strColumn) || empty($math) || empty($string) || empty($op))
+		{
+			$msg = 'Math a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		//FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table,$strColumn) && $this->column_exists($table,$string))
+		{
+			$column = $this->id_column($table,$strColumn);
+			$fieldwhere = $this->id_column($table,$string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		if($math == "+1")
+		{
+			$this->increment_where($strTable,$strColumn,1,$string,$op,$value);
+			// increment_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
+			return true;
+		}
+		elseif($math == "-1")
+		{
+			$this->decrement_where($strTable,$strColumn,1,$string,$op,$value);
+			// increment_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
+			return true;
+		}
+		
+		$sum = 0;
+		$avg= 0;
+		$counter = 0;
+		$result = 0;
+		$max = 0;
+		$min = 0;
+		if(empty($value))
+		{
+			$value = '';
+		}
+		$tab = $this->data[$table];
+
+		foreach($tab as $i=>$rec)
+		{
+			if($i==0) continue;
+			foreach($rec as $col=>$val)
+			{
+				if($col == $fieldwhere)
+				{				
+					if(empty($this->data[$table][$i][$column])) continue;
+					$this->data[$table][$i][$column] = preg_replace('/[^0-9.]/', '', $this->data[$table][$i][$column]);
+					//$this->data[$table][$i][$column] = floatval($this->data[$table][$i][$column] );
+					
+					switch($op)
+					{
+						case '==':
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$sum +=  $this->data[$table][$i][$column]; 
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;
+							}
+						break;
+						case '===':
+							if($this->data[$table][$i][$fieldwhere] === $value)
+							{
+								$sum +=  $this->data[$table][$i][$column]; 
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}		
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '!=':
+							if($this->data[$table][$i][$fieldwhere] != $value)
+							{
+								$sum +=  $this->data[$table][$i][$column]; 
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '<>':
+							if($this->data[$table][$i][$fieldwhere] <> $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '!==':
+							if($this->data[$table][$i][$fieldwhere] !== $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '<':
+							if($this->data[$table][$i][$fieldwhere] < $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '>':
+							if($this->data[$table][$i][$fieldwhere] > $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '<=':
+							if($this->data[$table][$i][$fieldwhere] <= $value)
+							{
+								$sum +=  $this->data[$table][$i][$column]; 
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;	
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}		
+								$counter++;	
+								$avg = $sum/$counter;											
+							}
+						break;
+						case '>=':	
+							if($this->data[$table][$i][$fieldwhere] >= $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}		
+								$counter++;	
+								$avg = $sum/$counter;								
+							}
+						break;
+						/*case '<=>':
+							if($this->data[$table][$i][$fieldwhere] <=> $value)
+							{
+								$this->data[$table][$i][$column] = $text;  
+							}
+						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$sum +=  $this->data[$table][$i][$column]; 
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;			
+							}
+						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$sum +=  $this->data[$table][$i][$column]; 
+									$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+									if($min !==0)
+									{
+										$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+									}
+									else
+									{
+										$min = $this->data[$table][$i][$column];
+									}	
+									$counter++;	
+									$avg = $sum/$counter;		
+								}
+							}
+						break;
+						case 'LIKE':
+							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
+							{
+								$sum +=  $this->data[$table][$i][$column];  
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}	
+								$counter++;	
+								$avg = $sum/$counter;			
+							}
+						break;
+						default:
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$sum +=  $this->data[$table][$i][$column];
+								$max = ($max < $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$max;
+								if($min !==0)
+								{
+									$min = ($min > $this->data[$table][$i][$column])?$this->data[$table][$i][$column]:$min;
+								}
+								else
+								{
+									$min = $this->data[$table][$i][$column];
+								}
+								$counter++;	
+								$avg = $sum/$counter;											
+							}		
+					}
+				}
+			}
+		}
+		switch($math)
+		{
+			case 'Sum':
+				$result=$sum;
+			break;
+			case 'Avg':
+				$result=$avg;
+			break;
+			case 'Max':
+				$result=$max;
+			break;
+			case 'Min':
+				$result=$min;
+			break;		
+			// Medium difference - Écart moyen
+			case 'Mdi':
+				$result=($max - $min) / ($counter-1);
+			break;				
+			default:
+				$result=$sum;
+		}
+		return $result;
 	}
 
 	function sub($strTable,$strColumnToSub,$strColumn=null,$intKey=null)
@@ -1718,7 +2082,7 @@ class Model
 			if($i==0) continue;
 			if(empty($this->data[$table][$i][$col]))
 			{
-				$this->data[$table][$i][$col] = $replace;
+				$this->data[$table][$i][$col] = '';
 			}
 			else
 			{
@@ -2052,6 +2416,23 @@ class Model
 								$this->data[$totable][$i][$tofield] = $this->data[$table][$i][$column];  
 							}
 						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] = $text;  
+								}
+							}
+						break;
 						case 'LIKE':
 							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
 							{
@@ -2189,6 +2570,23 @@ class Model
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
 							{
 								$this->data[$totable][$i][$tofield] = $this->data[$table][$i][$column];  
+							}
+						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] = $text;  
+								}
 							}
 						break;
 						case 'LIKE':
@@ -2606,6 +3004,23 @@ class Model
 								$this->data[$table][$i][$column] = $text;  
 							}
 						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] = $text;  
+								}
+							}
+						break;
 						case 'LIKE':
 							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
 							{
@@ -2623,6 +3038,311 @@ class Model
 		}
 		$this->save();
 	}
+	
+	public function increment_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
+	{
+		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
+		{
+			$msg = 'Copy a text in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		//FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table,$strColumn) && $this->column_exists($table,$string))
+		{
+			$column = $this->id_column($table,$strColumn);
+			$fieldwhere = $this->id_column($table,$string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		$text = intval($text);
+		if(empty($value))
+		{
+			$value = '';
+		}
+		$tab = $this->data[$table];
+
+		foreach($tab as $i=>$rec)
+		{
+			if($i==0) continue;
+			foreach($rec as $col=>$val)
+			{
+				if($col == $fieldwhere)
+				{
+					switch($op)
+					{
+						case '==':
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] += $text; 
+							}
+						break;
+						case '===':
+							if($this->data[$table][$i][$fieldwhere] === $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '!=':
+							if($this->data[$table][$i][$fieldwhere] != $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '<>':
+							if($this->data[$table][$i][$fieldwhere] <> $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '!==':
+							if($this->data[$table][$i][$fieldwhere] !== $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '<':
+							if($this->data[$table][$i][$fieldwhere] < $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '>':
+							if($this->data[$table][$i][$fieldwhere] > $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '<=':
+							if($this->data[$table][$i][$fieldwhere] <= $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case '>=':
+							if($this->data[$table][$i][$fieldwhere] >= $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						/*case '<=>':
+							if($this->data[$table][$i][$fieldwhere] <=> $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] += $text;  
+								}
+							}
+						break;
+						case 'LIKE':
+							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}
+						break;
+						default:
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] += $text;  
+							}		
+					}	
+				}
+			}
+		}
+		$this->save();
+	}
+	
+	public function decrement_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
+	{
+		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
+		{
+			$msg = 'Copy a text in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		//FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table,$strColumn) && $this->column_exists($table,$string))
+		{
+			$column = $this->id_column($table,$strColumn);
+			$fieldwhere = $this->id_column($table,$string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		$text = intval($text);
+		if(empty($value))
+		{
+			$value = '';
+		}
+		$tab = $this->data[$table];
+
+		foreach($tab as $i=>$rec)
+		{
+			if($i==0) continue;
+			foreach($rec as $col=>$val)
+			{
+				if($col == $fieldwhere)
+				{
+					switch($op)
+					{
+						case '==':
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] -= $text; 
+							}
+						break;
+						case '===':
+							if($this->data[$table][$i][$fieldwhere] === $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '!=':
+							if($this->data[$table][$i][$fieldwhere] != $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '<>':
+							if($this->data[$table][$i][$fieldwhere] <> $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '!==':
+							if($this->data[$table][$i][$fieldwhere] !== $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '<':
+							if($this->data[$table][$i][$fieldwhere] < $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '>':
+							if($this->data[$table][$i][$fieldwhere] > $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '<=':
+							if($this->data[$table][$i][$fieldwhere] <= $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case '>=':
+							if($this->data[$table][$i][$fieldwhere] >= $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						/*case '<=>':
+							if($this->data[$table][$i][$fieldwhere] <=> $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] -= $text;   
+								}
+							}
+						break;
+						case 'LIKE':
+							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}
+						break;
+						default:
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] -= $text;  
+							}		
+					}	
+				}
+			}
+		}
+		$this->save();
+	}
+	
 	
 	public function preprint($array)
 	{

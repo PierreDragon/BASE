@@ -295,14 +295,15 @@ input[type=text]:placeholder {
 
 		<!-- Login Form -->
 	   <form action="<?=$action?>" method="post">     
-		  <caption><strong>NO SQL PHP DATABASE</strong></caption>
-		  <input type="text" id="username" class="fadeIn second" name="username" placeholder="enter a base name" value="">
-		  <input type="text" id="password" class="fadeIn third" name="password" placeholder="enter a password" value=""> 
+		  <caption><strong>NO SQL PHP DATAFILE</strong></caption>
+		  <input type="text" id="username" class="fadeIn second" name="username" placeholder="create a base name"  required>
+		  <input type="text" id="password" class="fadeIn third" name="password" placeholder="create a password"  required> 
 		  <input type="submit" class="fadeIn fourth" value="CREATE">
 		</form>
 		<div id="formFooter">
 			<?php echo (isset($msg))?$msg:''; ?>
 			<?php //echo '<small>Current PHP version: ' . phpversion() . '</small>'; ?>
+			<a style="font-weight:bold" href="<?php echo WEBROOT.'about';	?>">About BASE</a>
 		</div>
 	</div>
 </div>

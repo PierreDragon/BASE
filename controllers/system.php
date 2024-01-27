@@ -199,7 +199,7 @@ class System extends Core\Controller
 	function add_table()
 	{
 		$this->denied('add a table ');
-	}	
+	}
 	function edit_table($url)
 	{
 		$this->denied('edit a table');

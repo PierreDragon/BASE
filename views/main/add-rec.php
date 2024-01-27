@@ -32,6 +32,13 @@
 				echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="file">';
 				echo '</div>';
 			}
+			elseif($colonne=='musique')
+			{
+				echo '<div class="form-group">';
+				echo '<label for="'.$colonne.'">'.$colonne.'</label>';
+				echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="file">';
+				echo '</div>';
+			}
 			else
 			{
 				echo '<div class="form-group">';

@@ -281,6 +281,8 @@ input[type=text]:placeholder {
 	font-size: x-small;
 }
 
+audio { width: 200px; }
+
 </style>
 <body>
 <div class="wrapper fadeInDown">

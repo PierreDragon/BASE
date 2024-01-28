@@ -43,7 +43,8 @@ class About extends Core\Controller
 	}
 	function oldtech($x,$y,$z)
 	{ 
-			$html = '<h1>Actual database <small> :  '.$_SESSION['username'].'.php</small></h1>';
+			$username = (isset($_SESSION['username']))?$_SESSION['username']:'not logged';
+			$html = '<h1>Actual database <small> :  '.$username.'.php</small></h1>';
 			$html .='<p>You must be logged in. If you want to see the current demo database, please log in with user: <strong>demo</strong> pass: <strong>demo</strong> or your own database using your username and password . Go ahead modify the database, create tables and columns, data and come back to see your table.</p>';
 			$html .='<small>note : Cells that contain coordinates do not contain any data, it is only for the display of this datafile as its maximum for all  index. </small>';
 			$html .= '<h5>TABLE:<span class="badge"> '.$x.'</span>  LINE:<span class="badge"> '.$y.'</span>   COLUMNS: <span class="badge">'.$z.'</span></h5>';

@@ -4,19 +4,20 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 8.5
+* @version: 8.6
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2023-01-01 13:54
+* @review: 2024-01-27 11:47
 * @added: BETWEEN operator in all functions with an OP
 * @added: operator in all functions with an OP
 * @added function math_column_where()
 * @added function increment_where()
+* @edit function del_lines_where() good to go with LIST
 * @licence MIT
 */
 class Model
 {
-	public static $version = '8.5';
+	public static $version = '8.6';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;

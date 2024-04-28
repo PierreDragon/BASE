@@ -4,16 +4,17 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.0
+* @version:	10.1
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2023-12-27 17:59
+* @revision: 2024-02-02 22:46
 * @added function sum_column_where()
+* @added function reverse_sequence_where()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.0';
+	public static $version = '10.1';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -892,7 +893,13 @@ class Controller
 								}
 								else
 								{
-									$tbody .= '<td>'.$value.'</td>';
+									//$tbody .= '<td id="td'.$key.'">'.$value.'</td>';
+									$tbody .= '<script>
+									$(document).ready(function(){
+									$("#td'.$key.'").editable("'.WEBROOT.'main/set_cell/'.$table.'/'.$key.'/'.$k.'",{name: \'value\'});
+									});
+									</script>';
+									$tbody .= '<td id="td'.$key.'" style="text-decoration:underline;">'.$value.'</td>';
 								}
 								//NEW
 								$idImage = $value;
@@ -1548,7 +1555,7 @@ class Controller
 
 		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column',' : This column to math');
 		// dropdown($db,$strTable,$selectName,$retcol=1,$value=null,$header=false,$label=null,$help=null,$offset=0)
-		$this->data['listmaths'] = $this->Template->dropdown($this->Sys,'maths','left',2,NULL,FALSE,'math',' : List of available actions: Sum, Avg, Max, Min, Mdi (medium difference / fr. écart moyen)') ;
+		$this->data['listmaths'] = $this->Template->dropdown($this->Sys,'maths','left',2,NULL,FALSE,'math',' : List of available actions: Sum, Avg, Max, Min, Mdi (medium difference / fr. écart moyen), Increment, Decrement') ;
 		$this->data['divstring'] = $this->Template->cdropdown($this->DB,$strTable,'string',NULL,FALSE,'where',' : The field that will serve for matching condition');
 		$this->data['listoperators'] = $this->Template->dropdown($this->Sys,'operators','operator',2,NULL,FALSE);
 		$this->data['divvalue'] = $this->Template->makediv('value','value',' : The value that will serve for matching condition');
@@ -1956,7 +1963,7 @@ class Controller
 				exit;
 			}
 			//find_replace($strTable,$strColumn,$find,$replace)
-			@$this->DB->find_replace($strTable,$post['strfield'],$post['string'],$post['value']);
+			@$this->DB->find_replace($strTable,$post['strfield'],$post['string'],trim($post['value']));
 			$this->Msg->set_msg('You have replaced '.$post['string'].' to  '.$post['value']);
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 			exit();
@@ -2057,6 +2064,44 @@ class Controller
 				//$this->Msg->set_msg("Sorry, there was an error uploading your file.");
 			}
 		}
+	}
+	
+	function reverse_sequence_where($url)
+	{
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		//var_dump($post); exit;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))			   
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+
+			@$this->DB->reverse_sequence_where($strTable,$post['strfield'],$post['value']);
+			$this->Msg->set_msg('You sequence '.$post['strfield']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)							
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Renverser une séquence';
+		//$this->data['placeholder'] = 'Copy text by matching condition ';
+
+		$this->data['columns'] = $this->actions;
+		//makediv($colonne,$label=null,$help=null,$value=null,$readonly=false,$hidden=false)
+		$this->data['liststrfields'] = $this->Template->makediv('strfield',null,' : recoit la valeur du premier ID visé.',$this->DB->primary);
+		$this->data['divvalue'] = $this->Template->makediv('value','values',' : Entrez le début et la fin (séparés par des virgules).');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/reverse_sequence_where/'.$strTable;
+		$this->data['content'] = $this->Template->load('reverse-sequence-where', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
 	}
 	public function fupload_music()
 	{

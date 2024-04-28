@@ -53,5 +53,9 @@
 	echo '<tr id="exec"><th>Records: '.$nombre.'</th><th style="text-align:right" colspan="'.($nbrcolonne+2).'"><span>Execution time: '.number_format($performance,2).' sec.</span></th></tr>';
 	echo '</tbody>';
 	echo '</table>';
+	echo '<div style="text-align:right"><a href="'.WEBROOT.$controller.'/add_record/'.$thead.' " class="btn btn-primary btn-sm" role="button">Ajoutez à la table '.$thead.'</a></div>';
+	echo '<div class="pagination">';
+	echo $pagination;
+	echo  '</div>';
 	echo '</div>';
 ?>

@@ -4,15 +4,17 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 8.6
+* @version: 8.8
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-01-27 11:47
+* @review: 2024-02-02 22:45
 * @added: BETWEEN operator in all functions with an OP
 * @added: operator in all functions with an OP
 * @added function math_column_where()
 * @added function increment_where()
 * @edit function del_lines_where() good to go with LIST
+* @added function erase_text_where()
+* @added function reverse_sequence_where()
 * @licence MIT
 */
 class Model
@@ -3040,6 +3042,157 @@ class Model
 		$this->save();
 	}
 	
+public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=null)
+	{
+		if(empty($strTable) || empty($strColumn) || empty($string) || empty($op))
+		{
+			$msg = 'Copy a text in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		//FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table,$strColumn) && $this->column_exists($table,$string))
+		{
+			$column = $this->id_column($table,$strColumn);
+			$fieldwhere = $this->id_column($table,$string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		
+		if(empty($value))
+		{
+			$value = '';
+		}
+		$tab = $this->data[$table];
+
+		foreach($tab as $i=>$rec)
+		{
+			if($i==0) continue;
+			foreach($rec as $col=>$val)
+			{
+				if($col == $fieldwhere)
+				{
+					switch($op)
+					{
+						case '==':
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] = ''; 
+							}
+						break;
+						case '===':
+							if($this->data[$table][$i][$fieldwhere] === $value)
+							{
+								$this->data[$table][$i][$column] = ''; 
+							}
+						break;
+						case '!=':
+							if($this->data[$table][$i][$fieldwhere] != $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						case '<>':
+							if($this->data[$table][$i][$fieldwhere] <> $value)
+							{
+								$this->data[$table][$i][$column] = ''; 
+							}
+						break;
+						case '!==':
+							if($this->data[$table][$i][$fieldwhere] !== $value)
+							{
+								$this->data[$table][$i][$column] = '';
+							}
+						break;
+						case '<':
+							if($this->data[$table][$i][$fieldwhere] < $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						case '>':
+							if($this->data[$table][$i][$fieldwhere] > $value)
+							{
+								$this->data[$table][$i][$column] = '';
+							}
+						break;
+						case '<=':
+							if($this->data[$table][$i][$fieldwhere] <= $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						case '>=':
+							if($this->data[$table][$i][$fieldwhere] >= $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						/*case '<=>':
+							if($this->data[$table][$i][$fieldwhere] <=> $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;*/
+						case 'BETWEEN':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						case 'LIST':
+							if(str_contains($value,',') == false )
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+								throw new \Exception($msg);
+								exit;
+							}
+							$test = explode(',',$value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$this->data[$table][$i][$column] = '';  
+								}
+							}
+						break;
+						case 'LIKE':
+							if(stripos($this->data[$table][$i][$fieldwhere],$value) !== false)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}
+						break;
+						default:
+							if($this->data[$table][$i][$fieldwhere] == $value)
+							{
+								$this->data[$table][$i][$column] = '';  
+							}		
+					}	
+				}
+			}
+		}
+		$this->save();
+	}
 	public function increment_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
@@ -3344,6 +3497,66 @@ class Model
 		$this->save();
 	}
 	
+	public function reverse_sequence_where($strTable,$strColumn,$value=null)
+	{
+		if(empty($strTable) || empty($strColumn) || empty($value) )
+		{
+			$msg = 'Copy a text in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		//FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table,$strColumn))
+		{
+			$column = $this->id_column($table,$strColumn);
+			$fieldwhere = $this->id_column($table,$strColumn);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+			throw new \Exception($msg);
+			exit;
+		}
+		
+		if(empty($value))
+		{
+			$value = '';
+		}
+		$tab = $this->data[$table];
+		$test = explode(',',$value);
+		$count = $test[1];
+		foreach($tab as $i=>$rec)
+		{
+			if($i==0) continue;
+			foreach($rec as $col=>$val)
+			{
+				if($col == $fieldwhere)
+				{
+					if(str_contains($value,',') == false )
+					{
+						$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+						$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+						throw new \Exception($msg);
+						exit;
+					}
+					//echo 'here!';exit;
+					if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
+					{
+						$this->data[$table][$i][$column] = $count;
+						$count--;
+					}	
+				}
+			}
+		}
+		$this->save();
+	}
 	
 	public function preprint($array)
 	{

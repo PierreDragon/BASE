@@ -36,9 +36,9 @@
 		}
 		echo'</th>';
 	}
-	echo '<th>show</th>';
-	echo '<th>edit</th>';
-	echo '<th>delete</th>';
+	echo '<th class="right">show</th>';
+	echo '<th class="right">edit</th>';
+	echo '<th class="right">delete</th>';
 	echo '</tr>';
 	echo '</thead>';
 	if($thead == "rules")

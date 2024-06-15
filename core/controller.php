@@ -388,14 +388,6 @@ class Controller
 						$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).toggleClass(\'minresize\');" /></td>';
 						//$tbody .= '<td><img id="img'.$idImage .'"  class="minresize" src="'.ASSETDIRECTORY.'uploads/'.$value.'" alt="'.$value.'" title="'.$value.'" onclick="$(this).removeClass(\'maxresize\');" /></td>';
 					}
-					elseif($col == 'musique')
-					{
-						$tbody .= '<td><audio controls>
-										  <source src="horse.ogg" type="audio/ogg">
-										  <source src="'.ASSETDIRECTORY.'uploads/'.$value.' " type="audio/mpeg">
-										  Your browser does not support the audio tag.
-										</audio></td>';
-					}
 					else
 					{
 						$tbody .= '<td>'.$value.'</td>';
@@ -407,17 +399,10 @@ class Controller
 					$tbody .= '<td>-</td>';
 					$i++;
 				}
-				//$tbody .='<td><a title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/showoff/'.$this->data['thead'].'/'.$this->DB->primary.'/'.$key.' ">show</a></td>';
-				if($strTable == 'musimages')
-				{
-					$tbody .='<td><a type="button" class="btn btn-primary" title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">play</a></td>';
-				}
-				else
-				{
-					$tbody .='<td><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
-				}
-				$tbody .='<td><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
-				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.$this->data['controller'].'/delete_record/'.$this->data['thead'].'/'.$key.' ">delete</a></td>';
+				
+				$tbody .='<td class="right"><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
+				$tbody .='<td class="right"><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
+				$tbody .= '<td class="right"><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.$this->data['controller'].'/delete_record/'.$this->data['thead'].'/'.$key.' ">delete</a></td>';
 				$tbody .= '</tr>';
 			}
 			//$this->data['tbody'] = $tbody;
@@ -930,17 +915,9 @@ class Controller
 					$tbody .= '<td>-</td>';
 					$i++;
 				}
-				//$tbody .='<td><a title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/showoff/'.$this->data['thead'].'/'.$this->DB->primary.'/'.$key.' ">show</a></td>';
-				if($strTable == 'musimages')
-				{
-					$tbody .='<td><a type="button" class="btn btn-primary" title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">play</a></td>';
-				}
-				else
-				{
-					$tbody .='<td><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
-				}
-				$tbody .='<td><a title="Edit this record ?"  href="'.WEBROOT.strtolower(get_class($this)).'/edit_record/'.$strTable.'/'.$key.' ">edit</a></td>';
-				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.strtolower(get_class($this)).'/delete_record/'.$strTable.'/'.$key.' ">delete</a></td>';
+				$tbody .='<td class="right"><a  title="Show this record ?"  href=" '.WEBROOT.$this->data['controller'].'/show_record/'.$this->data['thead'].'/'.$key.' ">show</a></td>';
+				$tbody .='<td class="right"><a title="Edit this record ?"  href="'.WEBROOT.strtolower(get_class($this)).'/edit_record/'.$strTable.'/'.$key.' ">edit</a></td>';
+				$tbody .= '<td class="right"><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.strtolower(get_class($this)).'/delete_record/'.$strTable.'/'.$key.' ">delete</a></td>';
 				$tbody .= '</tr>';
 			}
 			//$this->data['tbody'] = $tbody;

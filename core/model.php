@@ -662,14 +662,12 @@ class Model
 		$strTable="";
 		if(empty($post['table']) || empty($post['line']))
 		{
-			//$msg = 'function model::set_line() Real ID of the table or Line is not set.';
-			//$msg = 'Model line '.__LINE__ ;
 			$msg ='Table or line is missing !';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
 		}
-		if(is_numeric($post['table']))
+		elseif(is_numeric($post['table']))
 		{
 			$strTable = $this->table_name($post['table']);
 		}
@@ -681,8 +679,6 @@ class Model
 				
 		if(empty($post[$mandatory]))
 		{
-			//$msg = 'function model::set_line() Real ID of the table or Line is not set.';
-			//$msg = 'Model line '.__LINE__ ;
 			$msg ='A mandatory field is not set !';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);

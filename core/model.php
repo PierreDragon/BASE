@@ -13,7 +13,7 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 */
 class Model
 {
-	public static $version = '8.6';
+	public static $version = '8.9';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;

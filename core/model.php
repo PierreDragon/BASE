@@ -4,12 +4,13 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 8.9
+* @version: 9.0
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-16 17:17
+* @review: 2024-06-16 19:08
 * @added function add_record():int
 * @added function primary_column()
+* @optimized function set_line()
 */
 class Model
 {

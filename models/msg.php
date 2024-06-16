@@ -20,6 +20,7 @@ class Msg extends  Core\Model
 		$int = $this->count_lines(1)+1;
 		$post['table'] = 1;
 		$post['line'] = $int;
+		$post['id_message'] = $int;
 		if(isset($_SESSION['username']))
 		{
 			$post['user'] = $_SESSION['username'];

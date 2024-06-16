@@ -21,10 +21,10 @@
 			</div>
 		</div>
 		<div class="row-fluid">
-			<div id="menuleft" class="col-md-3">
+			<div id="menuleft" class="col-md-2">
 				<?php echo (isset($left))? $left:'$left'; ?>
 			</div>
-			<div id="contenu" class="col-md-9">
+			<div id="contenu" class="col-md-10">
 				<?php echo (isset($msg))? $msg:'$msg'; ?>
 				<div w3-include-html="<?php echo WEBROOT; ?>views/loader.php"></div>
 				<?php echo (isset($content))? $content:'$content'; ?>

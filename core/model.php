@@ -735,14 +735,14 @@ class Model
 		$this->repair_table($post['table']);
 		$n_lines = $this->count_lines($post['table']);
 		$post['line'] = ++$n_lines;
-		$this->preprint($post);
+
 		if(empty($post[$mandatory]))
 		{
 			$strTable = $this->table_name($post['table']);
 			$last = $this->last_number($strTable,$mandatory);
 			$post[$mandatory] = $last+1;
 		}
-		$this->preprint($post);
+
 		return $this->set_line($post);
 	}
 	public function del_line($table,$line)

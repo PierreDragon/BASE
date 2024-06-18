@@ -4,17 +4,18 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.1
+* @version:	10.2
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-02-02 22:46
+* @revision: 2024-06-18 17:26
 * @added function sum_column_where()
 * @added function reverse_sequence_where()
+* @fixed function properties()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.1';
+	public static $version = '10.2';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -572,7 +573,7 @@ class Controller
 		$this->data['content'] = $this->Template->load('fields',$this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
-	function show_record($url)
+/*	function show_record($url)
 	{
 		$strTable=$url[TABLE];
 		try
@@ -610,6 +611,45 @@ class Controller
 			}
 		}
 		$this->data['content'] = $this->Template->load('show-rec', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}*/
+	
+	function show_record($url)
+	{
+		$strTable=$url[TABLE];
+		$columns=array();
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit;
+			}
+			//LEFT
+			$this->properties('left',$strTable);
+			//$primary = $this->DB->column_name($strTable,1);
+			$this->Msg->set_msg("You have showed record at the table: $strTable");
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = "Show a record in the table: $strTable" ;
+		$this->data['record'] = $this->DB->record($strTable,$url[INDEX]);
+		$columns = $this->DB->columns($strTable);
+		foreach($columns as $key=>$col)
+		{
+			if(substr($col, -3, 1)=="_")
+			{
+				$strForeignTable = stristr($col, '_', true).'s';
+				$strField = stristr($col, '_', true);
+				$strColumn = 'id_'.$strField; 
+				$this->data['record'][$strField] = $this->DB->value_where_unique($strForeignTable,$strColumn,$this->data['record'][$col],$strField);
+				unset($this->data['record'][$col]);
+			}
+		}
+		$this->data['content'] = $this->Template->load('show-rec-dev', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
 	
@@ -684,14 +724,12 @@ class Controller
 			//LEFT
 			$this->properties('left',$strTable);
 			$post = @$_POST;
-			$primary = $this->DB->column_name($strTable,1);
 			$this->DB->set_line($post);
 			$this->Msg->set_msg("You have changed record $post[$primary] at the table: $strTable");
-			//header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			$n = $post['line']/$this->data['showlimit'];
 			$pag = ceil($n);
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.(int)$pag.'#tr'.$post['line']);
-			//exit;
+			exit;
 		}
 		catch (\Exception $t)
 		{
@@ -1047,7 +1085,8 @@ class Controller
 	{
 		try
 		{
-			$this->DB->set_table(array('table'=>$strTable,'primary'=>'id_'.$strTable));
+			$primary = $this->DB->primary_column($strTable);
+			$this->DB->set_table(array('table'=>$strTable,'primary'=>$primary));
 			$this->data['id'] = $this->DB->id_table;
 			$this->data['thead'] = $this->DB->table;
 			$this->data['nbrligne'] = $this->DB->table_nbrlines;
@@ -2200,6 +2239,10 @@ class Controller
 			
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'notes';
+			$this->Sys->add_line($post,'id_table');
+			
+			$post['id_table'] = ++$last;
+			$post['strtable'] = 'images';
 			$this->Sys->add_line($post,'id_table');
 			
 			$this->Msg->set_msg('You have loaded demo data ');

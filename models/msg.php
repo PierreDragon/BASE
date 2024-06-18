@@ -25,7 +25,7 @@ class Msg extends  Core\Model
 		{
 			$post['user'] = $_SESSION['username'];
 		}
-		$post['message'] =  $string;
+		$post['message'] = $string;
 		$post['datetime'] =  date("Y-m-d H:i:s",time());
 		if(!empty($string))
 		{

@@ -8,11 +8,10 @@
   </div>
 	<div class="panel-body">	
 		<ul>
-		<li>Import Schema</li>
-		<li>Set parameters</li>
-		<li>Import tables with main</li>
-		<li>Transfert main tables to shemas.php</li>
-		<li>Export Schema</li>
+		<li>Last review: 2024-06-16 19:08</li>
+		<li>@added function add_record():int</li>
+		<li>@added function primary_column()</li>
+		<li>@optimized function set_line()</li>
 		</ul>
 	</div>
 </div>

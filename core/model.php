@@ -4,17 +4,22 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.0
+* @version: 8.8
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-16 19:08
-* @added function add_record():int
-* @added function primary_column()
-* @optimized function set_line()
+* @review: 2024-02-02 22:45
+* @added: BETWEEN operator in all functions with an OP
+* @added: operator in all functions with an OP
+* @added function math_column_where()
+* @added function increment_where()
+* @edit function del_lines_where() good to go with LIST
+* @added function erase_text_where()
+* @added function reverse_sequence_where()
+* @licence MIT
 */
 class Model
 {
-	public static $version = '8.9';
+	public static $version = '8.6';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -222,7 +227,7 @@ class Model
 		$table = $this->id_table($strTable);
 		return $this->data[$table][$line][PRIMARY];
 	}
-
+	
 	public function edit_table($table,$strTable)
 	{
 		if($this->valid_rule($table,1))
@@ -300,7 +305,7 @@ class Model
 		}
 		elseif($this->column_exists($table,$strColumn))
 		{
-			$msg = 'Column ['.$strColumn.'] already exists !';
+			$msg = 'Column already exists !';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
@@ -597,10 +602,6 @@ class Model
 	public function table_name($table):string
 	{
 		$return = false;
-		if(!is_numeric($table))
-		{
-			$table = $this->id_table($table);
-		}
 		if( isset($this->data[0][0][$table]) )
 		{
 			$return = $this->data[0][0][$table];
@@ -653,42 +654,19 @@ class Model
 		}		
 		return $return;
 	}
-	public function primary_column($strTable)
-	{
-		$table = $this->id_table($strTable);
-		return $this->data[$table][0][PRIMARY];
-	}
 	public function set_line($post)
 	{
-		$strTable="";
 		if(empty($post['table']) || empty($post['line']))
 		{
-			$msg ='Table or line is missing !';
+			//$msg = 'function model::set_line() Real ID of the table or Line is not set.';
+			//$msg = 'Model line '.__LINE__ ;
+			$msg ='';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
 		}
-		elseif(is_numeric($post['table']))
-		{
-			$strTable = $this->table_name($post['table']);
-		}
-		else
-		{
-			$strTable = $post['table'];
-		}
-		$mandatory =  $this->primary_column($strTable);
-				
-		if(empty($post[$mandatory]))
-		{
-			$msg ='A mandatory field is not set !';
-			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-			throw new \Exception($msg);
-			exit;
-		}
-		
 		$table = $post['table'];
 		$line = $post['line'];
-	
 		unset($post['table'],$post['line']);
 		if(!is_numeric($table))
 		{
@@ -762,28 +740,6 @@ class Model
 			throw new \Exception($msg);
 		}
 	}
-	
-	public function add_record($post)
-	{
-		if(empty($post['table']))
-		{
-			$msg = 'Table name or id is missing';
-			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-			throw new \Exception($msg);
-		}
-		$this->repair_table($post['table']);
-		$n_lines = $this->count_lines($post['table']);
-		$post['line'] = ++$n_lines;
-		$strTable = $this->table_name($post['table']);
-		$mandatory = 'id_'.rtrim($strTable,'s');
-		if(empty($post[$mandatory]))
-		{
-			$last = $this->last_number($strTable,$mandatory);
-			$post[$mandatory] = $last+1;
-		}
-		return $this->set_line($post);
-	}
-	
 	public function del_lines_where($strTable,$strColumn,$op='==',$multiple='',$strKeyCol='')
 	{
 		//if(!$this->table_exists($strTable) || empty($strColumn) ||  empty($op) ||  empty($multiple) || empty($strKeyCol))
@@ -2081,10 +2037,10 @@ class Model
 		$newDate = ($time)? $date->format('Y-m-d H:i:s'):$date->format('Y-m-d');
 		return $newDate;
 	}
-	//***************************************************************//
+	//*************************************************//
 	//********  SETTING ONE TABLE FOR USAGE   *********//
-	//***************************************************************//
-	/*function set_table(array $a)
+	//*************************************************//
+	function set_table(array $a)
 	{
 		$this->table = strtolower($a['table']);
 		//Remove the "s" at the end of the primary field that receives the name of the table in the plural.
@@ -2099,14 +2055,6 @@ class Model
 		$this->id_table = $this->id_table($this->table);
 		$this->table_nbrlines = $this->count_lines($this->id_table);
 		$this->table_nbrcolumns = $this->count_columns($this->id_table);
-	}*////////
-	function set_table(array $a)
-	{
-		$this->table = strtolower($a['table']);
-		$this->id_table = $this->id_table($this->table);
-		$this->primary = strtolower($a['primary']);
-		$this->table_nbrlines = $this->count_lines($this->table);
-		$this->table_nbrcolumns = $this->count_columns($this->table);
 	}
 	function all($col=false)
 	{

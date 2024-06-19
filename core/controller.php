@@ -4,18 +4,19 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.2
+* @version:	10.3
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-18 17:26
+* @revision: 2024-06-19 18:44
 * @added function sum_column_where()
 * @added function reverse_sequence_where()
 * @fixed function properties()
+* @optimized function show() and show_table()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.2';
+	public static $version = '10.3';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -357,7 +358,12 @@ class Controller
 									$a = '<span>'.$value.' </span>';
 									foreach($records as $r=>$rule)
 									{
-										$a .= '<a href="'.WEBROOT.strtolower(get_class($this)).'/show/'.$rule[3].'/'.$arr[1].'_'.$arr[0].'/'.$value.'" title="Slave: '.$rule[3].'">['.$rule[3].']</a>';
+										// Checking if the master table has slaves 
+										$slave = $this->DB->where($rule[3],$arr[1].'_'.$arr[0],'==',$value);
+										if(isset($slave))
+										{
+											$a .= '<a href="'.WEBROOT.strtolower(get_class($this)).'/show/'.$rule[3].'/'.$arr[1].'_'.$arr[0].'/'.$value.'" title="Slave: '.$rule[3].'">['.$rule[3].']</a>';
+										}
 									}
 									$tbody .= '<td>'.$a.'</td>';
 								}
@@ -886,9 +892,14 @@ class Controller
 								if($records)
 								{
 									$a = '<span>'.$value.' </span>';
-									foreach($records as $i=>$rule)
+									foreach($records as $r=>$rule)
 									{
-										$a .= '<a href="'.WEBROOT.strtolower(get_class($this)).'/show/'.$rule[3].'/'.$arr[1].'_'.$arr[0].'/'.$value.'" title="Slave: '.$rule[3].'">['.$rule[3].']</a>';
+										// Checking if the master table has slaves 
+										$slave = $this->DB->where($rule[3],$arr[1].'_'.$arr[0],'==',$value);
+										if(isset($slave))
+										{
+											$a .= '<a href="'.WEBROOT.strtolower(get_class($this)).'/show/'.$rule[3].'/'.$arr[1].'_'.$arr[0].'/'.$value.'" title="Slave: '.$rule[3].'">['.$rule[3].']</a>';
+										}
 									}
 									$tbody .= '<td>'.$a.'</td>';
 								}

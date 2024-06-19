@@ -57,7 +57,7 @@ class Login extends Core\Controller
 			}
 			else
 			{
-				$this->Msg->set_msg('Create your own base ! | <a href="/login">Login</a>');
+				$this->Msg->set_msg('Create your own base ! | <a href="'.WEBROOT.'login">Login</a>');
 				$this->data['action'] = WEBROOT.strtolower(get_class($this));
 				$this->Template->load('login',$this->data);
 			}

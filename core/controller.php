@@ -667,8 +667,8 @@ class Controller
 				//dropdown($cols,$strTable,$selectName,$value=null)
 				switch($tblList)
 				{
-					case 'chargements' :
-						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_chargement',2=>'chargement',3=>'date',6=>'destination',13=>'datelivraison',14=>'time'));
+					case 'exemples' :
+						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
 					break;
 					default:
 						$filterColumns = $strListColumns;
@@ -721,8 +721,8 @@ class Controller
 				//dropdown($cols,$strTable,$selectName,$value=null)
 				switch($tblList)
 				{
-					case 'chargements' :
-						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_chargement',2=>'chargement',3=>'date',6=>'destination',13=>'datelivraison',14=>'time'));
+					case 'exemples' :
+						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
 					break;
 					default:
 						$filterColumns = $strListColumns;

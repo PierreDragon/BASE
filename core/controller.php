@@ -573,7 +573,8 @@ class Controller
 		$this->data['content'] = $this->Template->load('fields',$this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
-/*	function show_record($url)
+	
+	function show_record($url)
 	{
 		$strTable=$url[TABLE];
 		try
@@ -611,45 +612,6 @@ class Controller
 			}
 		}
 		$this->data['content'] = $this->Template->load('show-rec', $this->data,TRUE);
-		$this->Template->load('layout',$this->data);
-	}*/
-	
-	function show_record($url)
-	{
-		$strTable=$url[TABLE];
-		$columns=array();
-		try
-		{
-			if(!$this->DB->table_exists($strTable))
-			{
-				header('location:'.WEBROOT.strtolower(get_class($this)),false);
-				exit;
-			}
-			//LEFT
-			$this->properties('left',$strTable);
-			//$primary = $this->DB->column_name($strTable,1);
-			$this->Msg->set_msg("You have showed record at the table: $strTable");
-		}
-		catch (\Exception $t)
-		{
-			$this->Msg->set_msg($t->getMessage());
-		}
-		$this->get_message();
-		$this->data['legend'] = "Show a record in the table: $strTable" ;
-		$this->data['record'] = $this->DB->record($strTable,$url[INDEX]);
-		$columns = $this->DB->columns($strTable);
-		foreach($columns as $key=>$col)
-		{
-			if(substr($col, -3, 1)=="_")
-			{
-				$strForeignTable = stristr($col, '_', true).'s';
-				$strField = stristr($col, '_', true);
-				$strColumn = 'id_'.$strField; 
-				$this->data['record'][$strField] = $this->DB->value_where_unique($strForeignTable,$strColumn,$this->data['record'][$col],$strField);
-				unset($this->data['record'][$col]);
-			}
-		}
-		$this->data['content'] = $this->Template->load('show-rec-dev', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
 	
@@ -703,6 +665,14 @@ class Controller
 				$tblList = stristr($col, '_', true).'s';
 				$strListColumns = $this->DB->columns($tblList);
 				//dropdown($cols,$strTable,$selectName,$value=null)
+				switch($tblList)
+				{
+					case 'chargements' :
+						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_chargement',2=>'chargement',3=>'date',6=>'destination',13=>'datelivraison',14=>'time'));
+					break;
+					default:
+						$filterColumns = $strListColumns;
+				}
 				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col);
 			}
 		}
@@ -749,6 +719,14 @@ class Controller
 				$tblList = stristr($col, '_', true).'s';
 				$strListColumns = $this->DB->columns($tblList);
 				//dropdown($cols,$strTable,$selectName,$value=null)
+				switch($tblList)
+				{
+					case 'chargements' :
+						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_chargement',2=>'chargement',3=>'date',6=>'destination',13=>'datelivraison',14=>'time'));
+					break;
+					default:
+						$filterColumns = $strListColumns;
+				}
 				$value = $this->data['record'][$key];
 				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col,$value);
 			}
@@ -1035,7 +1013,7 @@ class Controller
 			{
 				for($i=1;$i<count($colkeys);$i++)
 				{
-					$str .= ' * '.$row[$colkeys[$i]];
+					$str .= $row[$colkeys[$i]].'  *  ';
 				}
 				if($row[$colkeys[0]]===$value)
 				{
@@ -1066,7 +1044,7 @@ class Controller
 			{
 				for($i=1;$i<count($colkeys);$i++)
 				{
-					$str .= ' * '.$row[$colkeys[$i]];
+					$str .= $row[$colkeys[$i]].'  *  ';
 				}
 				if($row[$colkeys[0]]===$value)
 				{

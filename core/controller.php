@@ -653,7 +653,7 @@ class Controller
 			$this->Msg->set_msg("You have added a record to table: $strTable");
 			$lines = $this->DB->count_lines($strTable);
 			$pag = $lines/$this->data['showlimit'];
-			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.(int)$pag.'#tr'.$line);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.ceil($pag).'#tr'.$line);
 			exit();
 		}
 		catch (\Exception $t)

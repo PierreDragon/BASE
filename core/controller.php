@@ -7,11 +7,12 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @version:	10.3
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-19 18:44
+* @revision: 2024-06-20 17:36
 * @added function sum_column_where()
 * @added function reverse_sequence_where()
 * @fixed function properties()
 * @optimized function show() and show_table()
+* @optimized pagination 
 * @licence MIT
 */
 class Controller
@@ -650,8 +651,8 @@ class Controller
 			}
 			$line = $this->DB->add_line($post,$this->DB->primary);
 			$this->Msg->set_msg("You have added a record to table: $strTable");
-			//header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
-			$pag = $last/$this->data['showlimit'] + 1;
+			$lines = $this->DB->count_lines($strTable);
+			$pag = $lines/$this->data['showlimit'];
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE].'?page='.(int)$pag.'#tr'.$line);
 			exit();
 		}

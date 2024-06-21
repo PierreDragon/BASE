@@ -7,7 +7,7 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @version: 9.1
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-20 20:32
+* @review: 2024-06-20 21:04
 * @added function add_record():int
 * @added function primary_column()
 * @optimized function set_line()
@@ -274,9 +274,9 @@ class Model
 		ksort($this->data);
 		$this->save();
 	}
-	//*************************************************//
+	//***************************************************//
 	//******************* COLUMNS ******************//
-	//*************************************************//
+	//***************************************************//
 	public function add_column($table,$strColumn)
 	{
 		if(!is_numeric($table))
@@ -291,7 +291,7 @@ class Model
 			throw new \Exception($msg);
 			exit;
 		}
-		elseif($this->verif_alpha_underscore($strColumn) && ($this->right($strColumn, 3)=='_id') && !$this->valid_foreign_key($strColumn))
+		elseif($this->verif_alpha_underscore($strColumn) && !$this->valid_foreign_key($strColumn))
 		{
 			$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
 			$msg .= 'and must referencing an existing master in the rules table.';

@@ -328,16 +328,17 @@ class Model
 		{
 			$column = $this->id_column($table,$column);
 		}
-		if($this->valid_rule($table,$column))
+		if( empty($table) || empty($strColumn))
 		{
-			$msg = 'A foreigh key constraint in the rules table does not allow the edition of this key.';
+			$msg = 'The fieldname must contain only alphabetic characters. Add <em>_id</em> suffix if you want to referring to a master table key. See table rules.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
 		}
-		elseif(!$this->verif_alpha_underscore($strColumn) || empty($table) || empty($strColumn))
+		elseif($this->verif_alpha_underscore($strColumn) && !$this->valid_foreign_key($strColumn))
 		{
-			$msg = 'The fieldname must contain only alphabetic characters and id_ for unique. Note that foreign key must be terminated by _id';
+			$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
+			$msg .= 'and must referencing an existing master in the rules table.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;

@@ -675,7 +675,7 @@ class Controller
 				switch($tblList)
 				{
 					case 'exemples' :
-						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
+						$filterColumns = $this->DB->filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
 					break;
 					default:
 						$filterColumns = $strListColumns;

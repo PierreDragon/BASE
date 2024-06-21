@@ -4,17 +4,18 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.0
+* @version: 9.1
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-16 19:08
+* @review: 2024-06-20 20:32
 * @added function add_record():int
 * @added function primary_column()
 * @optimized function set_line()
+* @optimized function add_column()
 */
 class Model
 {
-	public static $version = '9.0';
+	public static $version = '9.1';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -283,14 +284,14 @@ class Model
 			$table = $this->id_table($table);
 		}
 		
-		if( !$this->verif_alpha_underscore($strColumn) || empty($table) || empty($strColumn))
+		if( empty($table) || empty($strColumn))
 		{
-			$msg = 'The fieldname must contain only alphabetic characters and <em>_id</em> suffix for foreign key.';
+			$msg = 'The fieldname must contain only alphabetic characters. Add <em>_id</em> suffix if you want to referring to a master table key. See table rules.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;
 		}
-		elseif(($this->right($strColumn, 3)=='_id') && !$this->valid_foreign_key($strColumn))
+		elseif($this->verif_alpha_underscore($strColumn) && ($this->right($strColumn, 3)=='_id') && !$this->valid_foreign_key($strColumn))
 		{
 			$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
 			$msg .= 'and must referencing an existing master in the rules table.';
@@ -1241,12 +1242,12 @@ class Model
 	
 	function verif_alpha_underscore($str)
 	{
-		preg_match("/[^a-z_]/i",$str,$result);
-		if(!empty($result))
+		$result = false;
+		if($pos = strpos($str, '_') && ctype_alpha(str_replace('_','',$str)))
 		{
-			return false;
+			$result = true;
 		}
-		return true;
+		return $result;
 	}
 
 	function record($strTable,$line)

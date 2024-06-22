@@ -208,23 +208,23 @@ class System extends Core\Controller
 	{		
 		$this->denied('delete table');
 	}
-	function add_field($url)
+/*	function add_field($url)
 	{
 		$this->denied('add a field');
 	}
 	function edit_field($url)
 	{
 		$this->denied('edit a field');
-	}
+	}*/
 	function delete_field($url)
 	{
 		$this->denied('delete a field');
 	}
-	function add_record($url)
+/*	function add_record($url)
 	{
 		$this->denied('add a record');
 	}
-	/*function edit_record($url)
+	function edit_record($url)
 	{
 		$this->denied('edit a record');
 	}*/

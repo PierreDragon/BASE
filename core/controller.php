@@ -4,20 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.3
+* @version:	10.4
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-20 17:36
-* @added function sum_column_where()
-* @added function reverse_sequence_where()
-* @fixed function properties()
-* @optimized function show() and show_table()
-* @optimized pagination 
+* @revision: 2024-06-21 23:57
+* @optimization of fields list customization and system file as well
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.3';
+	public static $version = '10.4';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -665,22 +661,31 @@ class Controller
 		$this->data['placeholder'] = 'Add a record';
 		$this->data['columns'] = $this->DB->columns($strTable);
 		//var_dump($this->data['columns']); exit;
+
 		foreach($this->data['columns'] as $key=>$col)
 		{
 			if(substr($col, -3, 1)=="_")
 			{
 				$tblList = stristr($col, '_', true).'s';
 				$strListColumns = $this->DB->columns($tblList);
-				//dropdown($cols,$strTable,$selectName,$value=null)
-				switch($tblList)
+				$filter = $this->Sys->select_where(array(FIELD=>'lstfields'),'tables','strtable','==',$tblList);
+				$string = ($filter[array_key_first($filter)][FIELD]); 
+				if(!empty($string))
 				{
-					case 'exemples' :
-						$filterColumns = $this->DB->filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
-					break;
-					default:
-						$filterColumns = $strListColumns;
+					$explodes = explode(',',$string);
+					foreach($explodes as $f=>$field)
+					{
+						$i = $this->DB->id_column($tblList,$field);
+						$choices[$i] = $field;
+					}
+					$choices[PRIMARY] = 'id_'.stristr($col, '_', true);
+					$filterColumns = $this->DB->filter_columns($strListColumns,$choices);
 				}
-				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col);
+				else
+				{
+					$filterColumns = $strListColumns;
+				}				
+				$this->data['tblList'][$key] = $this->dropdown($filterColumns,$tblList,$col);
 			}
 		}
 		$this->data['table'] = $this->DB->id_table($strTable);
@@ -725,17 +730,25 @@ class Controller
 			{
 				$tblList = stristr($col, '_', true).'s';
 				$strListColumns = $this->DB->columns($tblList);
-				//dropdown($cols,$strTable,$selectName,$value=null)
-				switch($tblList)
+				$filter = $this->Sys->select_where(array(FIELD=>'lstfields'),'tables','strtable','==',$tblList);
+				$string = ($filter[array_key_first($filter)][FIELD]); 
+				if(!empty($string))
 				{
-					case 'exemples' :
-						$filterColumns = $this->DB-> filter_columns($strListColumns,array(1=>'id_exemple',2=>'exemple',3=>'date',4=>'time'));
-					break;
-					default:
-						$filterColumns = $strListColumns;
+					$explodes = explode(',',$string);
+					foreach($explodes as $f=>$field)
+					{
+						$i = $this->DB->id_column($tblList,$field);
+						$choices[$i] = $field;
+					}
+					$choices[PRIMARY] = 'id_'.stristr($col, '_', true);
+					$filterColumns = $this->DB->filter_columns($strListColumns,$choices);
 				}
+				else
+				{
+					$filterColumns = $strListColumns;
+				}	
 				$value = $this->data['record'][$key];
-				$this->data['tblList'][$key] = $this->dropdown($strListColumns,$tblList,$col,$value);
+				$this->data['tblList'][$key] = $this->dropdown($filterColumns,$tblList,$col,$value);
 			}
 		}
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/edit_record/'.$strTable.'/'.$url[INDEX];
@@ -1002,11 +1015,12 @@ class Controller
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 		exit();
 	}
-	function preprint($res)
+	function preprint($res,$end=false)
 	{
 		echo '<pre>';
 		print_r($res);
 		echo '</pre>';
+		if($end) exit();
 	}
 	function dropdown($cols,$strTable,$selectName,$value=null,$label=null,$disabled=null)
 	{
@@ -1023,7 +1037,7 @@ class Controller
 
 			foreach($rec as $row)
 			{
-				for($i=1;$i<count($colkeys);$i++)
+				for($i=0;$i<count($colkeys);$i++)
 				{
 					$str .= $row[$colkeys[$i]].'  *  ';
 				}
@@ -1054,7 +1068,7 @@ class Controller
 
 			foreach($rec as $row)
 			{
-				for($i=1;$i<count($colkeys);$i++)
+				for($i=0;$i<count($colkeys);$i++)
 				{
 					$str .= $row[$colkeys[$i]].'  *  ';
 				}

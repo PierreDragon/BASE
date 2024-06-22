@@ -4,16 +4,17 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.4
+* @version:	10.5
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-21 23:57
+* @revision: 2024-06-22 11:04
 * @optimization of fields list customization and system file as well
+* @control of the visibility of the id_* in dropdown list
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.4';
+	public static $version = '10.5';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -28,7 +29,7 @@ class Controller
 		$this->Sys->connect(DATADIRECTORY,'system','php');
 		$this->Msg->connect(DATADIRECTORY,'messages','php');
 
-		if(isset($_SESSION['username']) && get_class($this) != 'Message' && get_class($this) != 'System' && get_class($this) != 'Curriculum' )
+		if(isset($_SESSION['username']) && get_class($this) != 'Message' && get_class($this) != 'System')
 		{
 			$this->DB->connect(DATADIRECTORY,$_SESSION['username'],$ext);
 		}
@@ -1034,22 +1035,24 @@ class Controller
 		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'" '.$disabled.'>';
 		$str='';
 		$selected='';
-
-			foreach($rec as $row)
+		///// 10.5
+		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
+		$firstField = ($sys[4]=='on')?0:1;
+		/////////////////
+		foreach($rec as $row)
+		{
+			for($i=$firstField;$i<count($colkeys);$i++)
 			{
-				for($i=0;$i<count($colkeys);$i++)
-				{
-					$str .= $row[$colkeys[$i]].'  *  ';
-				}
-				if($row[$colkeys[0]]===$value)
-				{
-					$selected = 'selected="selected"';
-				}
-				$html .= '<option value="'.$row[$colkeys[0]].'"' .$selected. '>'.$str.'</option>';
-				$str ='';
-				$selected='';
+				$str .= $row[$colkeys[$i]].'  *  ';
 			}
-		//}
+			if($row[$colkeys[0]]===$value)
+			{
+				$selected = 'selected="selected"';
+			}
+			$html .= '<option value="'.$row[$colkeys[0]].'"' .$selected. '>'.$str.'</option>';
+			$str ='';
+			$selected='';
+		}
 		$html .= '</select>';
 		$html .= '</div>';
 		return $html;
@@ -1065,22 +1068,24 @@ class Controller
 		$html .= '<select class="form-control input-sm" name="'.$selectName.'">';
 		$str='';
 		$selected='';
-
-			foreach($rec as $row)
+		///// 10.5
+		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
+		$firstField = ($sys[4]=='on')?0:1;
+		/////////////////
+		foreach($rec as $row)
+		{
+			for($i=$firstField;$i<count($colkeys);$i++)
 			{
-				for($i=0;$i<count($colkeys);$i++)
-				{
-					$str .= $row[$colkeys[$i]].'  *  ';
-				}
-				if($row[$colkeys[0]]===$value)
-				{
-					$selected = 'selected="selected"';
-				}
-				$html .= '<option value="'.$row[$colkeys[0]].'"' .$selected. '>'.$str.'</option>';
-				$str ='';
-				$selected='';
+				$str .= $row[$colkeys[$i]].'  *  ';
 			}
-
+			if($row[$colkeys[0]]===$value)
+			{
+				$selected = 'selected="selected"';
+			}
+			$html .= '<option value="'.$row[$colkeys[0]].'"' .$selected. '>'.$str.'</option>';
+			$str ='';
+			$selected='';
+		}
 		$html .= '</select>';
 		$html .= '</div>';
 		return $html;

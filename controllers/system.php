@@ -224,10 +224,10 @@ class System extends Core\Controller
 	{
 		$this->denied('add a record');
 	}
-	function edit_record($url)
+	/*function edit_record($url)
 	{
 		$this->denied('edit a record');
-	}
+	}*/
 	function delete_record($url)
 	{
 		if( ($url[TABLE]=='users' || $url[TABLE]=='scripts' || $url[TABLE]=='operators'  || $url[TABLE]=='rwords' || $url[TABLE]=='configs') && $_SESSION['id_user'] !== "1" )

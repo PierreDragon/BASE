@@ -1,10 +1,10 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: System
-* @version: 7.2 
+* @version: 7.3 
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2023-01-01
+* @revision: 2024-06-23
 * @licence MIT
 */
 class System extends Core\Controller
@@ -12,7 +12,6 @@ class System extends Core\Controller
 	function __construct()
 	{
 		parent::__construct('system','php','system');
-		// <HEAD>
 		$this->data['title'] =' System';
 		$this->data['head'] = $this->Template->load('head',$this->data,TRUE);
 		
@@ -26,195 +25,27 @@ class System extends Core\Controller
 	{
 		if(isset($_SESSION['line'])>1 || empty($_SESSION))
 		exit('No direct script access allowed');
-		//parent::index();
-		// CONTENU
-		$this->data['file'] = $this->DB->filename;
-		$this->data['ffilesize'] = $this->DB->ffilesize;
-		$this->data['numtables'] = $this->DB->count_tables();
-		$this->data['maxlines'] = $this->DB->count_max_lines();
-		$this->data['maxcols'] = $this->DB->count_max_columns();
-		//$this->data['path'] = NULL;
-		$this->data['listfiles'] = $this->list_files(); 
-		$this->data['content'] = $this->Template->load('details',$this->data,TRUE);
-		// MAIN PAGE
-		$this->Template->load('layout',$this->data);
+		parent::index();
 	}
-	function renumber_column($url)
+	//IMPORTANT DO NOT DELETE ini() FUNCTION
+	function ini()
 	{
-		$strTable=$url[TABLE];		
-		$this->properties('left',$strTable);
-		$post = @$_POST;
-		try
-		{
-			if(!$this->DB->table_exists($strTable))
+			$answer = @$_POST['inlineRadioOptions'];
+			if(!isset($answer))
 			{
-				header('location:'.WEBROOT.strtolower(get_class($this)));
+				$refaction = WEBROOT.strtolower(get_class($this)).'/ini';
+				$this->question('Are you sure you want to initialize the database ? '.$this->colorize('everything will be erase ! ','red'),$refaction);
 				exit;
 			}
-			@$this->DB->renumber($strTable,$post['strfield'],$post['value']);
-			$this->Msg->set_msg('You have renumbered column '.$post['strfield'].' from '.$post['value'].' in the table '.$strTable);
-			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
-			exit();
-		}
-		catch (Throwable $t)
-		{
-			$this->Msg->set_msg($t->getMessage());
-		}
-		$this->get_message();
-		$this->data['legend'] = "Renumber a column of the table: $strTable" ;
-		$this->data['placeholder'] = 'Renumber a column';
-		
-		//$this->data['columns'] = $this->DB->columns('actions');
-		$this->data['columns'] = array(1=>'strfield',2=>'value');
-		
-		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,NULL,'column',' : Column to be renumbered');	
-		$this->data['divvalue'] = $this->Template->makediv('value','start',' : Beginning value');	
-	
-		$this->data['table'] = $this->DB->id_table($strTable);
-		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/renumber_column/'.$strTable;
-		$this->data['content'] = $this->Template->load('renumber-column', $this->data,TRUE);
-		$this->Template->load('layout',$this->data);
-	}
-	function show_table($url)
-	{
-		$debut = microtime(true)*1000;
-
-		if(isset($url[TABLE]) && $this->DB->table_exists($url[TABLE]))
-		{
-			$strTable = $url[TABLE];
-		}
-		else
-		{
-			$this->Msg->set_msg("Record not found in: $url[TABLE]");
-			header('Location:'.WEBROOT.strtolower(get_class($this)));
-			exit();
-		}
-
-		//$this->DB->set_table(array('table'=>$strTable,'primary'=>'id_'.$strTable));
-		
-		//LEFT
-		$this->properties('left',$strTable);
-		
-		//CONTENTS
-		$this->data['columns'] = $this->DB->columns($strTable);
-
-		if(isset($url[FIELD]))
-		{
-			$this->DB->order_by($strTable,$url[FIELD]);
-		}
-
-		$records = $this->DB->all();
-
-		if(isset($records))
-		{
-			$tbody ='';
-			foreach($records as $key=>$t)
+			elseif($answer == 'yes')
 			{
-				$tbody .= '<tr id="tr'.$key.'">';
-				$i = 0;
-				foreach($t as $k=>$value)
-				{
-					$table = $this->DB->id_table($strTable);
-					$col = $this->DB->column_name($table,$k);
-					if(substr($col, -3, 1)=="_")
-					{
-						$strForeignTable = stristr($col, '_', true).'s';
-						$col = stristr($col, '_', true);
-
-						$rec = $this->DB->get_where_unique($strForeignTable,'id_'.$col,$value);
-						$intForeignTable = $this->DB->id_table($strForeignTable);
-						$tbody .= '<td>';
-						if($rec)
-						{
-							$tbody .= $rec[1];
-						}
-						$tbody .= '</td>';
-					}
-					elseif(substr($col, 2, 1)=="_")
-					{
-						$arr=null;
-						if(strstr($col, '_'))
-						{
-							$arr=explode('_',$col);
-						}
-						if($col=='id_'.$arr[1] && isset($arr))
-						{
-							try
-							{
-								if($strTable=='blocks')
-								{
-									$tbody .= '<script>
-									$(document).ready(function(){
-									$("#td'.$key.'").editable("'.WEBROOT.'system/set_cell/'.$table.'/'.$key.'/'.$k.'",{name: \'value\'});
-									});
-									</script>';
-									$tbody .= '<td id="td'.$key.'" style="text-decoration:underline;">'.$value.'</td>';
-								}
-								else
-								{
-									$tbody .= '<td id="td'.$key.'">'.$value.'</td>';
-								}
-							}
-							catch (Throwable $t)
-							{
-								$tbody .= '<td id="td'.$key.'">'.$value.'</td>';
-							}
-						}
-						elseif($strTable=='blocks' && $col=='block')
-						{
-							//<a href=" '.WEBROOT.DEFAULTCONTROLLER'/load_script/'">'.$value.'</a>
-							//$_SESSION['sblock'] = $value;
-							//get_field_value_where_unique($strTable,$strColumn,$unique,$strField)
-							$id_block = $this->Sys->get_field_value_where_unique($strTable,'block',$value,'id_block');
-							$tbody .= '<td><a href="'.WEBROOT.DEFAULTCONTROLLER.'/load_script_get/'.$id_block.'">'.$value.'</a></td>';
-						}
-						else
-						{
-							$tbody .= '<td>'.$value.'</td>';
-						}
-					}
-					else
-					{
-						$tbody .= '<td>'.$value.'</td>';
-					}
-					$i++;
-				}
-				while($i < $this->data['nbrcolonne'] )
-				{
-					$tbody .= '<td>-</td>';
-					$i++;
-				}
-
-				switch($this->data['thead'])
-				{
-					case 'actions':
-						$tbody .='<td><a title="Edit this action ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_action/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
-					break;
-					default:
-						//$tbody .='<td><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$R.' ">edit</a></td>';
-						$tbody .='<td><a title="Edit this record ?"  href=" '.WEBROOT.$this->data['controller'].'/edit_record/'.$this->data['thead'].'/'.$key.' ">edit</a></td>';
-				}
-				$tbody .= '<td><a title="Are you sure you want to delete this record ?"  href=" '.WEBROOT.$this->data['controller'].'/delete_record/'.$this->data['thead'].'/'.$key.' ">delete</a></td>';
-
-				$tbody .= '</tr>';
+				$this->Sys->initialize();
+				//For tables list. Usefull for core/controller 
+				//$idtab = $this->Sys->id_table('tables');
+				//$this->Sys->empty_table($idtab);
+				$this->Msg->set_msg('You have initialized '.$this->data['title']);
 			}
-			$this->data['tbody'] = $tbody;
-		}
-		$fin = microtime(true)*1000;
-		$this->data['performance'] = $fin-$debut;
-		$this->data['content'] = $this->Template->load('tables', $this->data,TRUE);
-		//LAYOUT
-		$this->Template->load('layout',$this->data);
-	}
-	function list_files()
-	{
-		$html = '<ul>';
-		foreach (glob(DATADIRECTORY."*.php*") as $filename)
-		{
-			$html .= '<li>'."$filename size " . filesize($filename) .'</li>';
-		}
-		$html .= '</ul>';
-		return $html; 
+			header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
 	function add_table()
 	{
@@ -228,19 +59,19 @@ class System extends Core\Controller
 	{		
 		$this->denied('delete table');
 	}
-/*	function add_field($url)
+	function add_field($url)
 	{
 		$this->denied('add a field');
 	}
 	function edit_field($url)
 	{
 		$this->denied('edit a field');
-	}*/
+	}
 	function delete_field($url)
 	{
 		$this->denied('delete a field');
 	}
-/*	function add_record($url)
+	/*function add_record($url)
 	{
 		$this->denied('add a record');
 	}
@@ -250,7 +81,7 @@ class System extends Core\Controller
 	}*/
 	function delete_record($url)
 	{
-		if( ($url[TABLE]=='users' || $url[TABLE]=='scripts' || $url[TABLE]=='operators'  || $url[TABLE]=='rwords' || $url[TABLE]=='configs') && $_SESSION['id_user'] !== "1" )
+		if( ($url[TABLE]=='users' || $url[TABLE]=='scripts' || $url[TABLE]=='operators'  || $url[TABLE]=='configs') && $_SESSION['id_user'] !== "1" )
 		{
 			$this->denied('delete a record');
 		}
@@ -272,6 +103,14 @@ class System extends Core\Controller
 		$this->Msg->set_msg("You don't have the right to $string in this module.");
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 		exit();
+	}
+	
+	function list_files()
+	{
+		foreach (glob(DATADIRECTORY."*.php") as $filename)
+		{
+			echo "$filename size " . filesize($filename) . "\n";
+		}
 	}
 }
 ?>

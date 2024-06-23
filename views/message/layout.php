@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head> 
 	<?php echo (isset($head))? $head:'$head'; ?>
 </head>
   <body style="overflow-y:scroll;">
-	<div id="page" class="container-fluid">
+  <div id="page" class="container-fluid">
 		<div class="row-fluid">
 			<div id="banner" class="col-md-12">
 				<?php 
-				if(isset($_SESSION['jumbo']) && $_SESSION['jumbo']==1)
+				if(isset($_SESSION['jumbo']) && $_SESSION['jumbo'] == "1")
 				{
 					echo (isset($banner))? $banner:'$banner'; 
 				}

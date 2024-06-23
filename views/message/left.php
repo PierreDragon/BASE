@@ -1,7 +1,8 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<div class="panel-title">Tables</div> 
-		<a href="<?php echo WEBROOT.$link;?>/empty_table/messages" title="Empty messages">Initialize</a>
+		<!--a href="<?php echo WEBROOT.$link;?>/empty_table/messages" title="Empty messages">Initialize</a-->
+		<a href="<?php echo WEBROOT.$link;?>/ini" title="Empty messages">Initialize</a>
 	</div>
 	<div class="panel-body">
 		<?php 

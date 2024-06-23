@@ -3,7 +3,7 @@
 	<div class="form-group">
 		<h5><?php echo $tip?></h5>
 		<label for="<?php echo $name ?>"><?php echo $name ?></label>
-		<input type="text" class="form-control" id="<?php echo $name ?>" name="<?php echo $name ?>" placeholder="<?php echo $placeholder ?>"  title="<?php echo $name ?>">
+		<input type="text" class="form-control" id="<?php echo $name ?>" name="<?php echo $name ?>" placeholder="<?php echo $placeholder ?>"  title="<?php echo $name ?>" value="<?php echo $value ?>">
 	</div>
 	<button type="submit" class="btn btn-default">Save</button>
 </form>

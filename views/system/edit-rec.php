@@ -7,17 +7,27 @@
 		{
 			echo $tblList[$id];
 		}
+		elseif(strpos($colonne, 'date')!== false)
+		{
+			echo '<div class="form-group">';
+			echo '<label for="'.$colonne.'">'.$colonne.'</label>';
+			echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="date" value="'.$record[$id].'">';
+			echo '</div>';
+		}
+		elseif(strpos($colonne, 'time')!== false)
+		{
+			echo '<div class="form-group">';
+			echo '<label for="'.$colonne.'">'.$colonne.'</label>';
+			echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" type="time" value="'.$record[$id].'">';
+			echo '</div>';
+		}
 		else
 		{
 			echo '<div class="form-group">';
 			echo '<label for="'.$colonne.'">'.$colonne.'</label>';
 			if(strlen(@$record[$id]) > 32)
 			{
-				echo '<textarea class="form-control input-sm"  id="'.$colonne.'" name="'.$colonne.'"> '.$record[$id].'</textarea>';	
-			}
-			elseif(@!$record[$id])
-			{
-				echo '<input class="form-control input-sm" id="'.$colonne.'" name="'.$colonne.'" value="" type="text">';
+				echo '<textarea rows="10" class="form-control input-sm"  id="'.$colonne.'" name="'.$colonne.'"> '.$record[$id].'</textarea>';	
 			}
 			else
 			{

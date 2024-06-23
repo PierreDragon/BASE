@@ -1,6 +1,17 @@
 <?php  
 class Msg extends  Core\Model
 {
+	public function initialize()
+	{
+		unset($this->data);
+		$this->data[0][0][1]='messages';
+		$this->data[1][0][1]='id_message';
+		$this->data[1][0][2]='message';
+		$this->data[1][0][3]='user';
+		$this->data[1][0][4]='datetime';
+		$this->save();
+	}
+	
 	public function get_msg($unescape=FALSE)
 	{
 		$msg = 'Bienvenue';

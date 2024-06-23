@@ -1,2 +1,2 @@
-<p class="note" id="msg">Last info: <?=$msg?></p>
+<p class="note" id="msg"><?=$msg?></p>
 <hr>

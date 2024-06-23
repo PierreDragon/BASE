@@ -1035,7 +1035,7 @@ class Controller
 		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'" '.$disabled.'>';
 		$str='';
 		$selected='';
-		///// Version10.5
+		///// 10.5
 		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
 		$firstField = ($sys[4]=='on')?0:1;
 		/////////////////
@@ -1068,7 +1068,7 @@ class Controller
 		$html .= '<select class="form-control input-sm" name="'.$selectName.'">';
 		$str='';
 		$selected='';
-		///// Version10.5
+		///// 10.5
 		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
 		$firstField = ($sys[4]=='on')?0:1;
 		/////////////////

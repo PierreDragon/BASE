@@ -26,7 +26,18 @@ class System extends Core\Controller
 	{
 		if(isset($_SESSION['line'])>1 || empty($_SESSION))
 		exit('No direct script access allowed');
-		parent::index();
+		//parent::index();
+		// CONTENU
+		$this->data['file'] = $this->DB->filename;
+		$this->data['ffilesize'] = $this->DB->ffilesize;
+		$this->data['numtables'] = $this->DB->count_tables();
+		$this->data['maxlines'] = $this->DB->count_max_lines();
+		$this->data['maxcols'] = $this->DB->count_max_columns();
+		//$this->data['path'] = NULL;
+		$this->data['listfiles'] = $this->list_files(); 
+		$this->data['content'] = $this->Template->load('details',$this->data,TRUE);
+		// MAIN PAGE
+		$this->Template->load('layout',$this->data);
 	}
 	function renumber_column($url)
 	{
@@ -195,7 +206,16 @@ class System extends Core\Controller
 		//LAYOUT
 		$this->Template->load('layout',$this->data);
 	}
-
+	function list_files()
+	{
+		$html = '<ul>';
+		foreach (glob(DATADIRECTORY."*.php*") as $filename)
+		{
+			$html .= '<li>'."$filename size " . filesize($filename) .'</li>';
+		}
+		$html .= '</ul>';
+		return $html; 
+	}
 	function add_table()
 	{
 		$this->denied('add a table ');
@@ -252,14 +272,6 @@ class System extends Core\Controller
 		$this->Msg->set_msg("You don't have the right to $string in this module.");
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 		exit();
-	}
-	
-	function list_files()
-	{
-		foreach (glob(DATADIRECTORY."*.php") as $filename)
-		{
-			echo "$filename size " . filesize($filename) . "\n";
-		}
 	}
 }
 ?>

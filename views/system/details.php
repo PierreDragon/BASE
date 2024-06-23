@@ -7,8 +7,11 @@
 	  <h6>PHP Version  <span class="badge"><?php echo phpversion(); ?></span></h6>
   </div>
 	<div class="panel-body">
-<pre>	
-/**
+		<h2>Files</h2>
+		<?=$listfiles;?>
+	</div>
+	<div class="panel-footer">
+<pre>/**
 * @class: Controller
 * @version:	10.5
 * @author: info@webiciel.ca
@@ -17,7 +20,6 @@
 * @optimization of fields list customization and system file as well
 * @control of the visibility of the id_* in dropdown list
 * @licence MIT
-*/
-</pre>	
+*/</pre>	
 	</div>
 </div>

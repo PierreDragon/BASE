@@ -1,10 +1,11 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: System
-* @version: 7.3 
+* @version: 7.4 
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2024-06-23
+* @revision: 2024-06-24 12:38
+* @added field level to users table
 * @licence MIT
 */
 class System extends Core\Controller
@@ -15,16 +16,17 @@ class System extends Core\Controller
 		$this->data['title'] =' System';
 		$this->data['head'] = $this->Template->load('head',$this->data,TRUE);
 		
-		if(!isset($_SESSION['loggedin']) || $_SESSION['id_user']!=1)
+		if(!isset($_SESSION['loggedin']) || $_SESSION['level']!=1)
 		{
-			header('Location:'.WEBROOT.'login');
+			$this->Msg->set_msg("You don't have the right to access this module.");
+			header('Location:'.WEBROOT);
 			exit();
 		}
 	}
 	function index()
 	{
-		if(isset($_SESSION['line'])>1 || empty($_SESSION))
-		exit('No direct script access allowed');
+	/*	if(isset($_SESSION['line'])>1 || empty($_SESSION))
+		exit('No direct script access allowed');*/
 		parent::index();
 	}
 	//IMPORTANT DO NOT DELETE ini() FUNCTION

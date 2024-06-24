@@ -1,10 +1,11 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Login
-* @version: 7.2 
+* @version: 7.3 
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2023-01-01
+* @revision: 2024-06-24 12:38
+* @added field level to users table
 * @licence MIT
 */
 class Login extends Core\Controller
@@ -26,7 +27,7 @@ class Login extends Core\Controller
 				$colPass = $this->Sys->id_column($idTable,'password');
 				$colUser = $this->Sys->id_column($idTable,'username');
 				$colJumbo = $this->Sys->id_column($idTable,'jumbo');
-				$colApi = $this->Sys->id_column($idTable,'apikey');
+				$colLevel = $this->Sys->id_column($idTable,'level');
 				
 				if($user[$colPass] == trim(md5($post['password'])) && $user[$colUser] == trim($post['username']))
 				{
@@ -37,7 +38,7 @@ class Login extends Core\Controller
 					$post['id_user'] = $user[$colId];
 					$post['username'] = $user[$colUser];
 					$post['jumbo'] = $user[$colJumbo];
-					$post['apikey'] = $user[$colApi];
+					$post['level'] = $user[$colLevel];
 
 					$this->Sys->set_line($post);
 					$_SESSION = $post;

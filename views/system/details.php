@@ -9,8 +9,8 @@
 			<li>Number of tables : <?php echo $numtables; ?></li>
 			<li>Max number of lines : <?php echo $maxlines; ?></li>
 			<li>Max number of columns : <?php echo $maxcols; ?></li>
-			<li>Show limit : <?php echo $showlimit; ?> per page</li>
-			<li>Offset : <?php echo $offset;  ?></li>
+			<li>Show limit default: <?php echo $showlimitdefault; ?> per page</li>
+			<li>Offset default: <?php echo $offsetdefault;  ?></li>
 		  <ul>
 	  </div>
 </div>

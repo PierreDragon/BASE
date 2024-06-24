@@ -4,17 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.5
+* @version:	10.6
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-22 11:04
-* @optimization of fields list customization and system file as well
-* @control of the visibility of the id_* in dropdown list
+* @revision: 2024-06-24 14:32
+* @limit and offset configuration for each table
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.5';
+	public static $version = '10.6';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -1104,6 +1103,13 @@ class Controller
 			//No need to set path. __construct doing it.
 			//$this->data['path'] = $this->path;
 			$this->data['sys'] = $this->Sys;
+			//Showlimit
+			$sl = $this->Sys->value_where_unique('tables','strtable',$strTable,'showlimit');
+			$this->data['showlimit'] = (empty($sl))?$this->data['showlimitdefault']:$sl; 
+			//Offset
+			$offset = $this->Sys->value_where_unique('tables','strtable',$strTable,'offset');
+			$this->data['offset'] = (empty($sl))?$this->data['offsetdefault']:$offset; 
+			
 			$this->data[$view] = $this->Template->load($properties, $this->data,TRUE);
 		}
 		catch (\Exception $t)

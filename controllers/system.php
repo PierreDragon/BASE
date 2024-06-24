@@ -81,7 +81,7 @@ class System extends Core\Controller
 	}*/
 	function delete_record($url)
 	{
-		if( ($url[TABLE]=='users' || $url[TABLE]=='scripts' || $url[TABLE]=='operators'  || $url[TABLE]=='configs') && $_SESSION['id_user'] !== "1" )
+		if(($url[TABLE]=='configs' || $url[TABLE]=='users' || $url[TABLE]=='tables' || $url[TABLE]=='operators' || $url[TABLE]=='scripts' || $url[TABLE]=='files' || $url[TABLE]=='maths' ) && $_SESSION['id_user'] !== "1" )
 		{
 			$this->denied('delete a record');
 		}
@@ -90,7 +90,7 @@ class System extends Core\Controller
 			if($url[TABLE]=='files')
 			{
 				$rec = $this->DB->record($url[TABLE],$url[INDEX]);
-				if(file_exists(DATADIRECTORY.$rec['file']))
+				if(file_exists(DATADIRECTORY.$rec['file']) && $rec['file'] !== 'messages.php')
 				{
 					unlink(DATADIRECTORY.$rec['file']);
 				}

@@ -795,7 +795,7 @@ class Controller
 			$strTable = $url[TABLE];
 			try
 			{
-				if(!$this->check_rights($strTable,'add'))
+				if(!$this->check_rights($strTable,'delete'))
 				{
 					$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
 					header('location:'.WEBROOT.strtolower(get_class($this)),false);

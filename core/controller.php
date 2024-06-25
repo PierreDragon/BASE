@@ -2606,24 +2606,21 @@ class Controller
 			$msg = 'Table '. $this->colorize($strTable,'red'). ' is not synchronized !'; 
 			throw new \Exception($msg);
 			return false;
-		}	
+		}
 		$columns = $this->Sys->columns('rights');
 		$rights = $this->Sys->pick_where($columns,'rights','user_id','==',$_SESSION['id_user']);
 		if($rights)
 		{
 			foreach($rights as $rec=>$right)
 			{
-				if($unique['id_table']  ==  $right['table_id'] && $right[$action] ==1)
+				if($unique[PRIMARY]  ==  $right['table_id'] && $right[$action] ==1 )
 				{
 					return true;
 				}
-				else
-				{
-					$msg = 'You dont have the right to '. $this->colorize($action,'red'). ' on this table.'; 
-					throw new \Exception($msg);
-					return false;
-				}
 			}
+			$msg = 'You dont have the right to '. $this->colorize($action,'red'). '  in the '. $this->colorize($strTable,'red') .'table !' ; 
+			throw new \Exception($msg);
+			return false;
 		}
 		else
 		{

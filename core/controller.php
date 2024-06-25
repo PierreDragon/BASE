@@ -621,6 +621,23 @@ class Controller
 	function add_record($url)
 	{
 		$strTable=$url[TABLE];
+		
+		try
+		{
+			if(!$this->check_rights($strTable,'add'))
+			{
+				$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit();
+			}
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+			header('location:'.WEBROOT.strtolower(get_class($this)),false);
+			exit();
+		}
+		
 		// Properties function is setting the id_table, primary and table. See properties function.
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -698,6 +715,22 @@ class Controller
 		$strTable=$url[TABLE];
 		try
 		{
+			if(!$this->check_rights($strTable,'edit'))
+			{
+				$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit();
+			}
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+			header('location:'.WEBROOT.strtolower(get_class($this)),false);
+			exit();
+		}
+		
+		try
+		{
 			if(!$this->DB->table_exists($strTable))
 			{
 				header('location:'.WEBROOT.strtolower(get_class($this)),false);
@@ -760,6 +793,21 @@ class Controller
 		if(isset($url[TABLE]) && isset($url[FIELD]))
 		{
 			$strTable = $url[TABLE];
+			try
+			{
+				if(!$this->check_rights($strTable,'add'))
+				{
+					$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
+					header('location:'.WEBROOT.strtolower(get_class($this)),false);
+					exit();
+				}
+			}
+			catch (\Exception $t)
+			{
+				$this->Msg->set_msg($t->getMessage());
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit();
+			}
 			$idRec = $url[FIELD];
 			$idTable = $this->DB->id_table($strTable);
 			$answer = @$_POST['inlineRadioOptions'];
@@ -1036,7 +1084,8 @@ class Controller
 		$selected='';
 		///// 10.5
 		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
-		$firstField = ($sys[4]=='on')?0:1;
+		$idlistcol = $this->Sys->id_column('tables','idlist');
+		$firstField = ($sys[$idlistcol]=='on')?0:1;
 		/////////////////
 		foreach($rec as $row)
 		{
@@ -1069,7 +1118,8 @@ class Controller
 		$selected='';
 		///// 10.5
 		$sys = $this->Sys->where_unique('tables','strtable',$strTable);
-		$firstField = ($sys[4]=='on')?0:1;
+		$idlistcol = $this->Sys->id_column('tables','idlist');
+		$firstField = ($sys[$idlistcol]=='on')?0:1;
 		/////////////////
 		foreach($rec as $row)
 		{
@@ -2491,6 +2541,7 @@ class Controller
 		$this->Msg->set_msg('The table : '.$url[TABLE].' has been saved to '.$url[TABLE].'.js');
 		header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 	}
+	
 	function __destruct()
 	{
 		$this->cleanup();
@@ -2547,6 +2598,35 @@ class Controller
 			sleep(1);
 		}
 		header('Location:'.WEBROOT);
+	}
+	
+	function check_rights($strTable,$action)
+	{
+		$result = true;
+		$columns = $this->Sys->columns('rights');
+		$rights = $this->Sys->pick_where($columns,'rights','user_id','==',$_SESSION['id_user']);
+		if($rights)
+		{
+			foreach($rights as $rec=>$right)
+			{
+				$unique = $this->Sys->where_unique('tables','id_table',$right['table_id']);
+				$id_column = $this->Sys->id_column('tables','strtable');
+				if($right['table_id'] == $unique[PRIMARY] && $unique[$id_column] == $strTable)
+				{
+					if($right[$action] !== 1 && $right[$action] !== "1")
+					{
+						$msg = 'You dont have the right to '. $this->colorize($action,'red'). ' in this table.'; 
+						throw new \Exception($msg);
+						$result = false;
+					}
+				}
+			}
+		}
+		else
+		{
+			$result = false;
+		}
+		return $result;
 	}
 }
 ?>

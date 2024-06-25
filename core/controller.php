@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.6
+* @version:	10.7
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-24 14:32
-* @limit and offset configuration for each table
+* @revision: 2024-06-25 17:50
+* @optimized function check_rights()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.6';
+	public static $version = '10.7';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -2599,34 +2599,36 @@ class Controller
 		}
 		header('Location:'.WEBROOT);
 	}
-	
 	function check_rights($strTable,$action)
-	{
-		$result = true;
+	{	
+		if(is_null($unique = $this->Sys->where_unique('tables','strtable',$strTable)))
+		{
+			$msg = 'Table '. $this->colorize($strTable,'red'). ' is not synchronized !'; 
+			throw new \Exception($msg);
+			return false;
+		}	
 		$columns = $this->Sys->columns('rights');
 		$rights = $this->Sys->pick_where($columns,'rights','user_id','==',$_SESSION['id_user']);
 		if($rights)
 		{
 			foreach($rights as $rec=>$right)
 			{
-				$unique = $this->Sys->where_unique('tables','id_table',$right['table_id']);
-				$id_column = $this->Sys->id_column('tables','strtable');
-				if($right['table_id'] == $unique[PRIMARY] && $unique[$id_column] == $strTable)
+				if($unique['id_table']  ==  $right['table_id'] && $right[$action] ==1)
 				{
-					if($right[$action] !== 1 && $right[$action] !== "1")
-					{
-						$msg = 'You dont have the right to '. $this->colorize($action,'red'). ' in this table.'; 
-						throw new \Exception($msg);
-						$result = false;
-					}
+					return true;
+				}
+				else
+				{
+					$msg = 'You dont have the right to '. $this->colorize($action,'red'). ' on this table.'; 
+					throw new \Exception($msg);
+					return false;
 				}
 			}
 		}
 		else
 		{
-			$result = false;
+			return false;
 		}
-		return $result;
 	}
-}
+}	
 ?>

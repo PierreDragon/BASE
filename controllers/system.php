@@ -1,15 +1,19 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: System
-* @version: 7.4 
+* @version: 7.5 
 * @author: info@webiciel.ca
 * @php: 7.4
-* @revision: 2024-06-24 12:38
+* @revision: 2024-06-2 18:08
 * @added field level to users table
+* @fixed demo ini
+* @link control with user and script level
 * @licence MIT
 */
 class System extends Core\Controller
 {
+	public static $version = '7.5';
+	
 	function __construct()
 	{
 		parent::__construct('system','php','system');
@@ -61,7 +65,7 @@ class System extends Core\Controller
 	{		
 		$this->denied('delete table');
 	}
-	function add_field($url)
+	/*function add_field($url)
 	{
 		$this->denied('add a field');
 	}
@@ -72,7 +76,7 @@ class System extends Core\Controller
 	function delete_field($url)
 	{
 		$this->denied('delete a field');
-	}
+	}*/
 	/*function add_record($url)
 	{
 		$this->denied('add a record');
@@ -242,7 +246,7 @@ class System extends Core\Controller
 		}
 	}
 	
-		function dropdown($cols,$strTable,$selectName,$value=null,$label=null,$disabled=null)
+	function dropdown($cols,$strTable,$selectName,$value=null,$label=null,$disabled=null)
 	{
 		$rec = $this->DB->select($cols,$strTable);
 		//Désactive la ligne des noms de colonnes
@@ -251,7 +255,7 @@ class System extends Core\Controller
 		$html  = '<div class="form-group">';
 		$label = (isset($label))?$label:$selectName;
 		$html .= '<label for="'.$selectName.'">'.$label.'</label>';
-		$html .= '<select class="form-control input-sm"  id="'.$selectName.'" name="'.$selectName.'" '.$disabled.'>';
+		$html .= '<select class="form-control input-sm" id="'.$selectName.'" name="'.$selectName.'" '.$disabled.'>';
 		$str='';
 		$selected='';
 		///// 10.5

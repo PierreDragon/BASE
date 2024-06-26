@@ -2293,28 +2293,47 @@ class Controller
 		elseif($answer == 'yes')
 		{
 			$this->DB->demo();
-			//For system tables list
+			// For system tables list
 			$last = $this->Sys->last('tables');
 			$idtab = $this->Sys->id_table('tables');
 			$post['table'] = $idtab;
 			
 			$post['id_table'] = ++$last;
+			$post['strtable'] = 'rules';
+			$this->Sys->add_line($post,'id_table');
+			$this->add_right($post['strtable']);
+			
+			$post['id_table'] = ++$last;
 			$post['strtable'] = 'users';
 			$this->Sys->add_line($post,'id_table');
+			$this->add_right($post['strtable']);
 			
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'notes';
 			$this->Sys->add_line($post,'id_table');
+			$this->add_right($post['strtable']);
 			
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'images';
 			$this->Sys->add_line($post,'id_table');
-			
+			$this->add_right($post['strtable']);
+	
 			$this->Msg->set_msg('You have loaded demo data ');
 		}
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
-
+	
+	function add_right($strTable)
+	{
+		$id_table = $this->Sys->id_table('rights');
+		$post['table'] = $id_table;
+		// For rights on the demo tables
+		$post['user_id'] = $_SESSION['id_user'];
+		$post['table_id'] = $this->DB->id_table($strTable);
+		$post['add'] = $post['edit'] = $post['delete'] = 1;
+		$this->Sys->add_line($post,'id_right');
+	}
+	
 	function load_last_bkp()
 	{
 		$dir = DATADIRECTORY;

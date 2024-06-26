@@ -665,7 +665,7 @@ class Model
 		$strTable="";
 		if(empty($post['table']) || empty($post['line']))
 		{
-			$msg ='Table or line is missing !';
+			$msg ='';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
 			exit;

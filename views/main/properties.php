@@ -20,7 +20,7 @@
 	<?php endif; ?>
 	
 	<?php
-	$cols = [2=>'script',3=>'urlaction'];
+	$cols = [2=>'script',3=>'urlaction',4=>'level'];
 	$menu = $sys->select($cols,'scripts');
 
 	echo '<hr>';
@@ -32,20 +32,15 @@
 		break;
 		default:
 			echo '<div><a href="'.WEBROOT.$controller.'/add_record/'.$thead.'">Add a record</a></div>';
-			echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
+			//echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
 			echo '<hr>';
-			foreach($menu as $m=>$desc)
+			foreach($menu as $m=>$script)
 			{
-				if($m==0 OR $desc[3]=='import_table' 
-				OR $desc[3]=='add_table' 
-				OR $desc[3]=='edit_field' 
-				OR $desc[3]=='delete_field' 
-				//OR $desc[3]=='load_php'
-				//OR $desc[3]=='export_to_mysql'
-				//OR $desc[3]=='save_as_php'
+				if($m==0 OR $script[3]=='import_table' OR $script[3]=='add_table' OR $script[3]=='edit_field' OR $script[3]=='delete_field' OR $script[3]=='show_field'  OR $script[4] < $_SESSION['level'] 
+				//OR $script[3]=='load_php'	//OR $script[3]=='export_to_mysql'	//OR $script[3]=='save_as_php' 
 				) 
 				continue;
-				echo '<div><a href="'.WEBROOT.$controller.'/'.$desc[3].'/'.$thead.'">'.ucfirst($desc[2]).'</a></div>';	
+				echo '<div><a href="'.WEBROOT.$controller.'/'.$script[3].'/'.$thead.'">'.ucfirst($script[2]).'</a></div>';	
 			}
 	}
 

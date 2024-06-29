@@ -23,7 +23,7 @@
 	$cols = [2=>'script',3=>'urlaction'];
 	$menu = $sys->select($cols,'scripts');
 
-	echo '<hr>';
+	//echo '<hr>';
 	switch($thead)
 	{
 		case 'rules':
@@ -31,9 +31,11 @@
 			echo '<div><a href="'.WEBROOT.$controller.'/empty_table/'.$thead.'">Empty the current table</a></div>';
 		break;
 		default:
-			echo '<div><a href="'.WEBROOT.$controller.'/add_record/'.$thead.'">Add a record</a></div>';
-			echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
+			//echo '<a href=" '.WEBROOT.$link.'/bkp">Make a back-up</a>';
+			//echo '<div><a href="'.WEBROOT.$controller.'/add_record/'.$thead.'">Add a record</a></div>';
+			//echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
 			echo '<hr>';
+			echo '<div><a href="'.WEBROOT.$controller.'/empty_table/'.$thead.'">Empty the current table</a></div>';
 			foreach($menu as $m=>$desc)
 			{
 				if($m==0 OR $desc[3]=='import_table' 
@@ -45,7 +47,7 @@
 				//OR $desc[3]=='save_as_php'
 				) 
 				continue;
-				echo '<div><a href="'.WEBROOT.$controller.'/'.$desc[3].'/'.$thead.'">'.ucfirst($desc[2]).'</a></div>';	
+				//echo '<div><a href="'.WEBROOT.$controller.'/'.$desc[3].'/'.$thead.'">'.ucfirst($desc[2]).'</a></div>';	
 			}
 	}
 

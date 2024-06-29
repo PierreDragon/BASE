@@ -4,19 +4,20 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.2
+* @version: 9.3
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-20 21:04
+* @review: 2024-06-29 14:08
 * @added function add_record():int
 * @added function primary_column()
 * @optimized function set_line()
 * @optimized function add_column()
 * @added function record_exists()
+* @optimized add_column() and edit_column() 
 */
 class Model
 {
-	public static $version = '9.2';
+	public static $version = '9.3';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -338,11 +339,14 @@ class Model
 		}
 		elseif($this->verif_alpha_underscore($strColumn) && !$this->valid_foreign_key($strColumn))
 		{
-			$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
-			$msg .= 'and must referencing an existing master in the rules table.';
-			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
-			throw new \Exception($msg);
-			exit;
+			if($this->right($strColumn,3) == '_id')
+			{
+				$msg = 'If you try to create a foreigh key it must be terminated by "_id" ';
+				$msg .= 'and must referencing an existing master in the rules table.';
+				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
+				throw new \Exception($msg);
+				exit;
+			}
 		}
 		$this->set_cell($table,0,$column,$strColumn);
 		return true;

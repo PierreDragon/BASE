@@ -21,20 +21,19 @@
 	echo '<tr>';
 	foreach($columns as $id=>$col)
 	{
-		echo '<th>';
-		if($thead <> "rules")
+		if($col == "datetime")
 		{
+			echo '<th style="width:10%">';
 			echo '<a href="'.WEBROOT.$controller.'/show_table/'.$thead.'/'.$col.'" title="sort by '.$col.'" onclick="includeHTML()">'.$col.'</a>';
-			echo '&nbsp;';
-			echo '<a title="Edit a field" style="color:red; font-weight:normal; text-decoration:none;" href="'.WEBROOT.$controller.'/edit_field/'.$thead.'/'.$id.'"><em>edit</em></a>';
-			echo '&nbsp;';
-			echo '<a title="Delete a field"  style="color:red; font-weight:normal; text-decoration:none;"  href="'.WEBROOT.$controller.'/delete_field/'.$thead.'/'.$id.'"><em>delete</em></a>';
+			echo'</th>';
 		}
 		else
 		{
+			echo '<th>';			
 			echo $col;
+			echo'</th>';
 		}
-		echo'</th>';
+
 	}
 	echo '<th class="right">show</th>';
 	echo '<th class="right">edit</th>';

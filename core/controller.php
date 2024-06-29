@@ -7,7 +7,8 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @version:	10.9
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-29 12:13
+* @revision: 2024-06-29 14:09
+* @added function synchronize()
 * @added function check_level()
 * @added function action_level()
 * @optimized function check_rights()
@@ -115,13 +116,22 @@ class Controller
 			$strTable = $this->DB->remove_accents($strTable);
 			if($this->DB->add_table($strTable))
 			{
-			//For system tables list 
+			// For system tables list 
 				$last = $this->Sys->last('tables');
 				$idtab = $this->Sys->id_table('tables');
 				$post['table'] = $idtab;
 				$post['id_table'] = $last+1;
 				$post['strtable'] = $strTable;
 				$this->Sys->add_line($post,'id_table');
+				
+				// Manage full rights as a new table
+				$idtab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+				$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idtab,4=>1,5=>1,6=>1];
+				if(! $this->Sys->record_exists('rights',$myRecord))
+				{
+					$this->add_right($post['strtable']);
+				}
+				
 				$this->Msg->set_msg('You have added the table : '.$strTable);
 				header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
 				exit;
@@ -158,6 +168,14 @@ class Controller
 				$line = $this->Sys->real_id($idtab,'strtable',$strTableName);
 				$post = ['table' => $idtab,'line' => $line,'id_table'=>$id_table, 'strtable'=>$strTable];
 				$this->Sys->set_line($post);
+				
+				// Manage full rights as a new table
+				$idtab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+				$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idtab,4=>1,5=>1,6=>1];
+				if(! $this->Sys->record_exists('rights',$myRecord))
+				{
+					$this->add_right($post['strtable']);
+				}
 
 				$this->Msg->set_msg('You renamed the table: '.$strTableName.' for: '.$strTable);
 				header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
@@ -2324,22 +2342,61 @@ class Controller
 	
 	function ini()
 	{
-			$answer = @$_POST['inlineRadioOptions'];
-			if(!isset($answer))
+		$answer = @$_POST['inlineRadioOptions'];
+		if(!isset($answer))
+		{
+			$refaction = WEBROOT.strtolower(get_class($this)).'/ini';
+			$this->question('Are you sure you want to initialize the database ? '.$this->colorize('everything will be erase except table rules ! ','red'),$refaction);
+			exit;
+		}
+		elseif($answer == 'yes')
+		{
+			$this->DB->initialize();
+			//For tables list
+			$idtab = $this->Sys->id_table('tables');
+			$this->Sys->empty_table($idtab);
+			$this->Msg->set_msg('You have initialized '.$this->data['title']);
+		}
+		header('Location:'.WEBROOT.strtolower(get_class($this)));
+	}
+	
+	function synchronize()
+	{
+		$answer = @$_POST['inlineRadioOptions'];
+		if(!isset($answer))
+		{
+			$refaction = WEBROOT.strtolower(get_class($this)).'/synchronize';
+			$this->question('Are you sure you want to synchronize the database ? '.$this->colorize('All tables will set the system ! ','red'),$refaction);
+			exit;
+		}
+		elseif($answer == 'yes')
+		{
+			//For tables list
+			$idtab = $this->Sys->id_table('tables');
+			$this->Sys->empty_table($idtab);
+			$this->synchro();
+			$this->Msg->set_msg('You have initialized '.$this->data['title']);
+		}
+		header('Location:'.WEBROOT.strtolower(get_class($this)));
+	}
+	
+	private function synchro()
+	{
+		$tables = $this->DB->tables();
+		foreach($tables as $table)
+		{
+			$last = $this->Sys->last('tables');
+			$post['table'] = $this->Sys->id_table('tables');
+			$post['id_table'] = ++$last;
+			$post['strtable'] = $table;
+			$this->Sys->add_line($post,'id_table');
+			$idTab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+			$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idTab,4=>1,5=>1,6=>1];
+			if(! $this->Sys->record_exists('rights',$myRecord))
 			{
-				$refaction = WEBROOT.strtolower(get_class($this)).'/ini';
-				$this->question('Are you sure you want to initialize the database ? '.$this->colorize('everything will be erase except table rules ! ','red'),$refaction);
-				exit;
+				$this->add_right($post['strtable']);
 			}
-			elseif($answer == 'yes')
-			{
-				$this->DB->initialize();
-				//For tables list
-				$idtab = $this->Sys->id_table('tables');
-				$this->Sys->empty_table($idtab);
-				$this->Msg->set_msg('You have initialized '.$this->data['title']);
-			}
-			header('Location:'.WEBROOT.strtolower(get_class($this)));
+		}
 	}
 	
 	function demo()

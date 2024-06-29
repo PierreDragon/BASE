@@ -24,7 +24,7 @@ class DB extends Core\Model
 	{
 		unset($this->data);
 		$this->data[0][0][1]='rules';
-		$this->data[0][0][2]='users';
+		$this->data[0][0][2]='authors';
 		$this->data[0][0][3]='notes';
 		$this->data[0][0][4]='images';
 		$this->data[1][0][1]='id_rule';
@@ -32,20 +32,20 @@ class DB extends Core\Model
 		$this->data[1][0][3]='slave';
 		$this->data[1][0][4]='comment';
 		$this->data[1][1][1]='1';
-		$this->data[1][1][2]='users';
+		$this->data[1][1][2]='authors';
 		$this->data[1][1][3]='notes';
 		$this->data[1][1][4]='';
-		$this->data[2][0][1]='id_user';
-		$this->data[2][0][2]='user';
+		$this->data[2][0][1]='id_author';
+		$this->data[2][0][2]='author';
 		$this->data[2][1][1]='1';
-		$this->data[2][1][2]='user 1';
+		$this->data[2][1][2]='author 1';
 		$this->data[2][2][1]='2';
-		$this->data[2][2][2]='user 2';
+		$this->data[2][2][2]='author 2';
 		$this->data[2][3][1]='3';
-		$this->data[2][3][2]='user 3';
+		$this->data[2][3][2]='author3';
 		$this->data[3][0][1]='id_note';
 		$this->data[3][0][2]='note';
-		$this->data[3][0][3]='user_id';
+		$this->data[3][0][3]='author_id';
 		$this->data[3][1][1]='1';
 		$this->data[3][1][2]='note 1';
 		$this->data[3][1][3]='1';

@@ -192,6 +192,7 @@ class System extends Core\Controller
 		$this->data['table'] = $this->DB->id_table($strTable);
 		$this->data['line'] = $url[INDEX];
 		$this->data['record'] = $this->DB->line($this->data['table'],$url[INDEX]);
+		
 		foreach($this->data['columns'] as $key=>$col)
 		{
 			if(substr($col, -3, 1)=="_")

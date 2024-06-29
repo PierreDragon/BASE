@@ -4,16 +4,19 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.7
+* @version:	10.9
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-25 17:50
+* @revision: 2024-06-29 12:13
+* @added function check_level()
+* @added function action_level()
 * @optimized function check_rights()
+* @optimized function demo() adding a new function from model::record_exists()
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '10.7';
+	public static $version = '10.9';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -104,6 +107,8 @@ class Controller
 	}
 	function add_table()
 	{
+		$this->action_level(__FUNCTION__);
+		
 		try
 		{
 			$strTable = @$_POST['table'];
@@ -137,6 +142,7 @@ class Controller
 	}
 	function edit_table($url)
 	{
+		$this->action_level(__FUNCTION__);
 		//LEFT
 		//$this->properties('left',$url[TABLE]);
 		try
@@ -174,6 +180,8 @@ class Controller
 	}
 	function delete_table($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		if($this->DB->table_exists($strTable))
 		{
@@ -203,6 +211,8 @@ class Controller
 	}
 	function empty_table($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		if($this->DB->table_exists($strTable))
 		{
@@ -434,6 +444,8 @@ class Controller
 
 	function add_field($url)
 	{
+		$this->action_level(__FUNCTION__);
+			
 		$strTable=$url[TABLE];
 
 		if(!$this->DB->table_exists($strTable))
@@ -441,7 +453,7 @@ class Controller
 			header('Location:'.WEBROOT.strtolower(get_class($this)));
 			exit;
 		}
-
+		
 		$this->properties('left',$strTable);
 
 		try
@@ -469,6 +481,8 @@ class Controller
 	}
 	function edit_field($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable = $url[TABLE];
 		$intColumn = $url[FIELD];
 
@@ -508,6 +522,8 @@ class Controller
 	}
 	function delete_field($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		if(isset($url[TABLE]) && isset($url[FIELD]))
 		{
 			$strTable = $url[TABLE];
@@ -839,6 +855,8 @@ class Controller
 	}
 	function delete_duplicates($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1248,6 +1266,8 @@ class Controller
 	}
 	function delete_where($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1287,6 +1307,8 @@ class Controller
 	}
 	function copy_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1322,6 +1344,8 @@ class Controller
 	}
 	function split_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1366,6 +1390,8 @@ class Controller
 	}
 	function split_column_needle($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1409,6 +1435,8 @@ class Controller
 	}
 	function move_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1444,6 +1472,8 @@ class Controller
 	}
 	function copy_column_keys($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1483,6 +1513,8 @@ class Controller
 	}
 	function copy_data_keys($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1526,6 +1558,8 @@ class Controller
 	}
 	function copy_text_where($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1607,6 +1641,8 @@ class Controller
 	
 	function math_column_where($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1657,6 +1693,8 @@ class Controller
 	
 	function switch_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1696,6 +1734,8 @@ class Controller
 	}
 	function merge_rows($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1744,6 +1784,8 @@ class Controller
 	}
 	function move_one_to_many($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1784,6 +1826,8 @@ class Controller
 	}
 	function renumber_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1794,7 +1838,9 @@ class Controller
 				header('location:'.WEBROOT.strtolower(get_class($this)));
 				exit;
 			}
-			@$this->DB->renumber($strTable,$post['strfield'],$post['value']);
+			@$this->DB->renumber($strTable,$post['strfield'],$post['value'])
+			
+			;
 			$this->Msg->set_msg('You have renumbered column '.$post['strfield'].' from '.$post['value'].' in the table '.$strTable);
 			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$url[TABLE]);
 			exit();
@@ -1819,6 +1865,8 @@ class Controller
 	}
 	function match_column($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1856,6 +1904,8 @@ class Controller
 	}
 	function concat_columns($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1894,6 +1944,8 @@ class Controller
 	}
 	function date_corrector($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1930,6 +1982,8 @@ class Controller
 	}
 	function time_corrector($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -1965,6 +2019,8 @@ class Controller
 	}
 	function copy_table($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$copy = $this->DB->copy_table($url[TABLE]);
 		$lastdm = $this->Sys->last('tables');
 		$idtabdm = $this->Sys->id_table('tables');
@@ -2031,6 +2087,8 @@ class Controller
 	}
 	function find_replace($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		//LEFT
 		$this->properties('left',$strTable);
@@ -2149,6 +2207,8 @@ class Controller
 	
 	function reverse_sequence_where($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$strTable=$url[TABLE];
 		$this->properties('left',$strTable);
 		$post = @$_POST;
@@ -2281,6 +2341,7 @@ class Controller
 			}
 			header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
+	
 	function demo()
 	{
 		$answer = @$_POST['inlineRadioOptions'];
@@ -2295,28 +2356,48 @@ class Controller
 			$this->DB->demo();
 			// For system tables list
 			$last = $this->Sys->last('tables');
-			$idtab = $this->Sys->id_table('tables');
-			$post['table'] = $idtab;
+			$post['table'] = $this->Sys->id_table('tables');
 			
+			// RULES
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'rules';
 			$this->Sys->add_line($post,'id_table');
-			$this->add_right($post['strtable']);
-			
+			$idTab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+			$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idTab,4=>1,5=>1,6=>1];
+			if(! $this->Sys->record_exists('rights',$myRecord))
+			{
+				$this->add_right($post['strtable']);
+			}
+			// AUTHORS
 			$post['id_table'] = ++$last;
-			$post['strtable'] = 'users';
+			$post['strtable'] = 'authors';
 			$this->Sys->add_line($post,'id_table');
-			$this->add_right($post['strtable']);
-			
+			$idTab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+			$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idTab,4=>1,5=>1,6=>1];
+			if(! $this->Sys->record_exists('rights',$myRecord))
+			{
+				$this->add_right($post['strtable']);
+			}
+			// NOTES
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'notes';
 			$this->Sys->add_line($post,'id_table');
-			$this->add_right($post['strtable']);
-			
+			$idTab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+			$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idTab,4=>1,5=>1,6=>1];
+			if(! $this->Sys->record_exists('rights',$myRecord))
+			{
+				$this->add_right($post['strtable']);
+			}
+			// IMAGES
 			$post['id_table'] = ++$last;
 			$post['strtable'] = 'images';
 			$this->Sys->add_line($post,'id_table');
-			$this->add_right($post['strtable']);
+			$idTab = $this->Sys->value_where_unique('tables','strtable',$post['strtable'],'id_table');
+			$myRecord = [1=>1,2=>$_SESSION['id_user'],3=>$idTab,4=>1,5=>1,6=>1];
+			if(! $this->Sys->record_exists('rights',$myRecord))
+			{
+				$this->add_right($post['strtable']);
+			}
 	
 			$this->Msg->set_msg('You have loaded demo data ');
 		}
@@ -2336,6 +2417,8 @@ class Controller
 	
 	function load_last_bkp()
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$dir = DATADIRECTORY;
 		$flag = false;
 		// Ouvre un dossier et liste tous les fichiers
@@ -2386,6 +2469,8 @@ class Controller
 	}
 	function load_php($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2416,6 +2501,8 @@ class Controller
 	}
 	function load_json($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2439,6 +2526,8 @@ class Controller
 	}
 	function save_as_php($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2469,6 +2558,8 @@ class Controller
 	}
 	function save_as_csv($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2493,6 +2584,8 @@ class Controller
 	}
 	function load_csv($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2516,6 +2609,8 @@ class Controller
 	}
 	function save_as_json($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2539,6 +2634,8 @@ class Controller
 	}
 	function save_as_js($url)
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!$answer)
 		{
@@ -2644,6 +2741,35 @@ class Controller
 		else
 		{
 			return false;
+		}
+	}
+	public function check_level($urlaction):bool
+	{
+		$script = $this->Sys->where_unique('scripts','urlaction',$urlaction);
+		$level = $this->Sys->id_column('scripts','level');	
+		$name = $this->Sys->id_column('scripts','script');		
+		if($_SESSION['level'] > $script[$level])
+		{
+			$msg = 'You dont have the right to '. $this->colorize($script[$name],'red').' !' ; 
+			throw new \Exception($msg);
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	public function action_level($action)
+	{
+		try
+		{
+			$this->check_level($action);
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+			header('Location:'.WEBROOT.strtolower(get_class($this)));
+			exit;
 		}
 	}
 }	

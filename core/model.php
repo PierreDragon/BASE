@@ -4,7 +4,7 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.1
+* @version: 9.2
 * @author: info@webiciel.ca
 * @php: 8
 * @review: 2024-06-20 21:04
@@ -12,10 +12,11 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 * @added function primary_column()
 * @optimized function set_line()
 * @optimized function add_column()
+* @added function record_exists()
 */
 class Model
 {
-	public static $version = '9.1';
+	public static $version = '9.2';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -1128,7 +1129,22 @@ class Model
 	{
 		return $this->where_multiple($strTable,$strColumn,$op,$value);
 	}
-
+	
+	public function record_exists($strTable,$myRecord)
+	{
+		$records = $this->table($strTable);
+		foreach($records as $record)
+		{
+			unset($record[1],$myRecord[1]);
+			$currentRecord = array_intersect_assoc($record,$myRecord);
+			if(($currentRecord <=> $myRecord) == 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public function value_where_unique($strTable,$strColumn,$unique,$strField)
 	{
 		$return = null;

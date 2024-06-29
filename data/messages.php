@@ -405,19 +405,11 @@ $data[1][100][2]='You don&#039;t have the right to edit a record in this module.
 $data[1][100][3]='bozo';
 $data[1][100][4]='2024-06-29 14:29:03';
 $data[1][101][1]='101';
-$data[1][101][2]='Create your own base ! | &lt;a href="&#047;base&#047;login"&gt;Login&lt;&#047;a&gt;';
-$data[1][101][3]='';
-$data[1][101][4]='2024-06-29 14:42:13';
+$data[1][101][2]='Please provide a base name and a password! | &lt;a href="&#047;login"&gt;Login&lt;&#047;a&gt;';
+$data[1][101][3]='bozo';
+$data[1][101][4]='2024-06-29 14:42:09';
 $data[1][102][1]='102';
-$data[1][102][2]='You are logged in! pierre';
-$data[1][102][3]='pierre';
-$data[1][102][4]='2024-06-29 14:42:19';
-$data[1][103][1]='103';
-$data[1][103][2]='You have initialized BASE';
-$data[1][103][3]='pierre';
-$data[1][103][4]='2024-06-29 14:42:28';
-$data[1][104][1]='104';
-$data[1][104][2]='You have initialized  System';
-$data[1][104][3]='pierre';
-$data[1][104][4]='2024-06-29 14:42:46';
+$data[1][102][2]='Create your own base ! | &lt;a href="&#047;basedev&#047;login"&gt;Login&lt;&#047;a&gt;';
+$data[1][102][3]='';
+$data[1][102][4]='2024-06-29 14:42:09';
 ?>

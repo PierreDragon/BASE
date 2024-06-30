@@ -6,7 +6,7 @@ ini_set("display_errors", "1"); // display_errors : 0 or 1
 set_time_limit(60); //seconds
 date_default_timezone_set('America/New_York'); 
 
-define('VERSION','2.0');
+define('VERSION','2.1');
 define('ROOT',__DIR__.DIRECTORY_SEPARATOR);
 // Ensure the current directory is pointing to the front controller's directory
 chdir(ROOT);

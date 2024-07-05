@@ -36,7 +36,7 @@
 			echo '<hr>';
 			foreach($menu as $m=>$script)
 			{
-				if($m==0 OR $script[3]=='import_table' OR $script[3]=='add_table' OR $script[3]=='edit_field' OR $script[3]=='delete_field' OR $script[3]=='show_field'  OR $script[4] < $_SESSION['level'] 
+				if($m==0 OR $script[3]=='import_table' OR $script[3]=='add_table' OR $script[3]=='edit_field' OR $script[3]=='delete_field' OR $script[3]=='show_field'  OR $script[3]=='load_last_bkp' OR $script[3]=='bkp' OR $script[4] < $_SESSION['level'] 
 				//OR $script[3]=='load_php'	//OR $script[3]=='export_to_mysql'	//OR $script[3]=='save_as_php' 
 				) 
 				continue;

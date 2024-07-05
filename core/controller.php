@@ -40,6 +40,7 @@ class Controller
 		{
 			$this->DB->connect(DATADIRECTORY,$file,$ext);
 		}
+		
 		//Delete duplicates in sys files table
 		$table = $this->Sys->id_table('files');
 		$column = $this->Sys->id_column($table,'file');
@@ -656,21 +657,7 @@ class Controller
 	{
 		$strTable=$url[TABLE];
 		
-		try
-		{
-			if(!$this->check_rights($strTable,'add'))
-			{
-				$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
-				header('location:'.WEBROOT.strtolower(get_class($this)),false);
-				exit();
-			}
-		}
-		catch (\Exception $t)
-		{
-			$this->Msg->set_msg($t->getMessage());
-			header('location:'.WEBROOT.strtolower(get_class($this)),false);
-			exit();
-		}
+		$this->rights($strTable,'add');
 		
 		// Properties function is setting the id_table, primary and table. See properties function.
 		$this->properties('left',$strTable);
@@ -747,21 +734,8 @@ class Controller
 	function edit_record($url)
 	{
 		$strTable=$url[TABLE];
-		try
-		{
-			if(!$this->check_rights($strTable,'edit'))
-			{
-				$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
-				header('location:'.WEBROOT.strtolower(get_class($this)),false);
-				exit();
-			}
-		}
-		catch (\Exception $t)
-		{
-			$this->Msg->set_msg($t->getMessage());
-			header('location:'.WEBROOT.strtolower(get_class($this)),false);
-			exit();
-		}
+		
+		$this->rights($strTable,'edit');
 		
 		try
 		{
@@ -827,21 +801,9 @@ class Controller
 		if(isset($url[TABLE]) && isset($url[FIELD]))
 		{
 			$strTable = $url[TABLE];
-			try
-			{
-				if(!$this->check_rights($strTable,'delete'))
-				{
-					$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
-					header('location:'.WEBROOT.strtolower(get_class($this)),false);
-					exit();
-				}
-			}
-			catch (\Exception $t)
-			{
-				$this->Msg->set_msg($t->getMessage());
-				header('location:'.WEBROOT.strtolower(get_class($this)),false);
-				exit();
-			}
+			
+			$this->rights($strTable,'delete');
+			
 			$idRec = $url[FIELD];
 			$idTable = $this->DB->id_table($strTable);
 			$answer = @$_POST['inlineRadioOptions'];
@@ -1091,6 +1053,8 @@ class Controller
 	}
 	function bkp()
 	{
+		$this->action_level(__FUNCTION__);
+		
 		$this->DB->save(TRUE);
 		$dat = date('Y-m-d H:i:s',time());
 		//$dat = str_replace(' ', '', $dat);
@@ -2372,8 +2336,8 @@ class Controller
 		elseif($answer == 'yes')
 		{
 			//For tables list
-			$idtab = $this->Sys->id_table('tables');
-			$this->Sys->empty_table($idtab);
+			/*$idtab = $this->Sys->id_table('tables');
+			$this->Sys->empty_table($idtab);*/
 			$this->synchro();
 			$this->Msg->set_msg('You have initialized '.$this->data['title']);
 		}
@@ -2396,6 +2360,7 @@ class Controller
 			{
 				$this->add_right($post['strtable']);
 			}
+			usleep(100000);
 		}
 	}
 	
@@ -2752,6 +2717,25 @@ class Controller
 		$this->data['methods'] = $oReflectionClass->getMethods();
 		return $this->Template->load('methods',$this->data,TRUE);
 		//$this->Template->load('layout',$this->data);
+	}
+	
+	function rights($strTable,$action)
+	{
+		try
+		{
+			if(!$this->check_rights($strTable,$action))
+			{
+				$this->Msg->set_msg('Your rights are missing on table '.$this->colorize($strTable,'red').' !');
+				header('location:'.WEBROOT.strtolower(get_class($this)),false);
+				exit();
+			}
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+			header('location:'.WEBROOT.strtolower(get_class($this)),false);
+			exit();
+		}
 	}
 	
 	function tables_to_system()

@@ -58,7 +58,7 @@ class Sys extends Core\Model
 		$this->data[3][1][1]='1';
 		$this->data[3][1][2]='pierre';
 		$this->data[3][1][3]='182e1692fa55b1bce9debbfbd9f820a2';
-		$this->data[3][1][4]='1';
+		$this->data[3][1][4]='0';
 		$this->data[3][1][5]='1';
 		$this->data[3][1][6]='1';
 		$this->data[4][0][1]='id_table';
@@ -317,6 +317,14 @@ class Sys extends Core\Model
 		$this->data[6][36][2]='time corrector';
 		$this->data[6][36][3]='time_corrector';
 		$this->data[6][36][4]='1';
+		$this->data[6][37][1]='40';
+		$this->data[6][37][2]='load last back-up';
+		$this->data[6][37][3]='load_last_bkp';
+		$this->data[6][37][4]='1';
+		$this->data[6][38][1]='41';
+		$this->data[6][38][2]='make a back-up';
+		$this->data[6][38][3]='bkp';
+		$this->data[6][38][4]='1';
 		$this->data[7][0][1]='id_file';
 		$this->data[7][0][2]='file';
 		$this->data[8][0][1]='id_math';

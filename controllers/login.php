@@ -122,8 +122,8 @@ class Login extends Core\Controller
 			$post['username'] = strip_tags($post['username']);
 			$post['password'] = strip_tags($post['password']);
 			$post['password'] = trim(md5($post['password']));
-			$post['jumbo'] = "1"; 
-			$post['apikey'] = $post['password']; 
+			$post['jumbo'] = 1;
+			$post['level'] = 3;
 			//var_dump($post); exit;
 			$this->Sys->add_line($post,'id_user');
 			$_SESSION = $post;

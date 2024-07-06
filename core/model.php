@@ -665,7 +665,7 @@ class Model
 		$table = $this->id_table($strTable);
 		return $this->data[$table][0][PRIMARY];
 	}
-	public function set_line($post)
+	public function set_line($post):int
 	{
 		$strTable="";
 		if(empty($post['table']) || empty($post['line']))

@@ -30,7 +30,7 @@ class About extends Core\Controller
 		// ARTICLE
 		$this->data['content']  = $this->Template->load('info', $this->data,TRUE);
 		$this->data['maxcols'] = ($this->data['numtables'] > $this->data['maxcols'] )?$this->data['numtables']:$this->data['maxcols'];
-		$this->data['content'] .= $this->oldtech($this->data['numtables'] ,$this->data['maxlines'] ,$this->data['maxcols'] );
+	//	$this->data['content'] .= $this->oldtech($this->data['numtables'] ,$this->data['maxlines'] ,$this->data['maxcols'] );
 		//.aside-1
 		$this->data['reflectionl'] = $r =$this->reflection($this);
 		$this->data['left'] = $this->Template->load('left',$this->data,TRUE);

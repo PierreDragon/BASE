@@ -96,6 +96,7 @@ class Controller
 	}
 	function index()
 	{
+		//$this->preprint($this->data['tables'],true);
 		// CONTENU
 		$this->data['file'] = $this->DB->filename;
 		$this->data['ffilesize'] = $this->DB->ffilesize;
@@ -1158,7 +1159,7 @@ class Controller
 			$this->data['showlimit'] = (empty($sl))?$this->data['showlimitdefault']:$sl; 
 			//Offset
 			$offset = $this->Sys->value_where_unique('tables','strtable',$strTable,'offset');
-			$this->data['offset'] = (empty($sl))?$this->data['offsetdefault']:$offset; 
+			$this->data['offset'] = (empty($offset))?$this->data['offsetdefault']:$offset; 
 			
 			$this->data[$view] = $this->Template->load($properties, $this->data,TRUE);
 		}

@@ -4,16 +4,11 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.3
+* @version: 9.4
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-06-29 14:08
-* @added function add_record():int
-* @added function primary_column()
-* @optimized function set_line()
-* @optimized function add_column()
-* @added function record_exists()
-* @optimized add_column() and edit_column() 
+* @review: 2024-07-13 15:43
+* @optimized function pick_where()
 */
 class Model
 {
@@ -1365,7 +1360,7 @@ class Model
 		}
 		return $result;
 	}
-	function pick_where(array $columns,$strTable,$strColumn,$op='==',$value='')
+	function pick_where(array $columns,$strTable,$strColumn,$op='==',$value='',$unique=false)
 	{
 		$id = $this->id_table($strTable);
 		$cols = $this->columns($id);
@@ -1380,6 +1375,10 @@ class Model
 				$select[$id][$i][$c] = $this->data[$id][$i][$c];		
 			}	
 			$result[$i] = $this->combine($columns,$select[$id][$i]);
+		}
+		if($unique)
+		{
+			$result = $result[array_key_first($result)];
 		}
 		return $result;
 	}

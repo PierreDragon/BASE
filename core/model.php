@@ -2107,22 +2107,6 @@ class Model
 	//***************************************************************//
 	//********  SETTING ONE TABLE FOR USAGE   *********//
 	//***************************************************************//
-	/*function set_table(array $a)
-	{
-		$this->table = strtolower($a['table']);
-		//Remove the "s" at the end of the primary field that receives the name of the table in the plural.
-		if(substr($this->table, -1)=='s')
-		{ 
-			$this->primary = 'id_'.substr($this->table, 0, -1);
-		}
-		else
-		{
-			$this->primary = 'id_'.$this->table;
-		}
-		$this->id_table = $this->id_table($this->table);
-		$this->table_nbrlines = $this->count_lines($this->id_table);
-		$this->table_nbrcolumns = $this->count_columns($this->id_table);
-	}*////////
 	function set_table(array $a)
 	{
 		$this->table = strtolower($a['table']);
@@ -2131,6 +2115,7 @@ class Model
 		$this->table_nbrlines = $this->count_lines($this->table);
 		$this->table_nbrcolumns = $this->count_columns($this->table);
 	}
+	
 	function all($col=false)
 	{
 		$recordset = $this->get_table($this->id_table);

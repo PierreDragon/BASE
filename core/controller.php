@@ -4,15 +4,11 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	10.9
+* @version:	11.0
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-06-29 14:09
-* @added function synchronize()
-* @added function check_level()
-* @added function action_level()
-* @optimized function check_rights()
-* @optimized function demo() adding a new function from model::record_exists()
+* @revision: 2024-07-20 9:00
+* @optimized line 402
 * @licence MIT
 */
 class Controller
@@ -399,7 +395,7 @@ class Controller
 									//$tbody .= '<td id="td'.$key.'">'.$value.'</td>';
 									$tbody .= '<script>
 									$(document).ready(function(){
-									$("#td'.$key.'").editable("'.WEBROOT.'main/set_cell/'.$table.'/'.$key.'/'.$k.'",{name: \'value\'});
+									$("#td'.$key.'").editable("'.WEBROOT.strtolower(get_class($this)).'/set_cell/'.$table.'/'.$key.'/'.$k.'",{name: \'value\'});
 									});
 									</script>';
 									$tbody .= '<td id="td'.$key.'" style="text-decoration:underline;">'.$value.'</td>';

@@ -13,7 +13,7 @@ if ( ! defined('ROOT')) exit('No direct script access allowed');
 */
 class Controller
 {
-	public static $version = '10.9';
+	public static $version = '11.0';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];

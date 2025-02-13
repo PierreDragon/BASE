@@ -4,11 +4,11 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	11.0
+* @version:	11.1
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2024-07-20 9:00
-* @optimized line 402
+* @revision: 2025-02-13 10:59 AM
+* @debug add_right function
 * @licence MIT
 */
 class Controller
@@ -223,7 +223,8 @@ class Controller
 				$this->Msg->set_msg($t->getMessage());
 			}
 		}
-		header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+		//header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+		header('Location:'.WEBROOT.strtolower(get_class($this)));  // 2024-02-12
 	}
 	function empty_table($url)
 	{
@@ -2429,7 +2430,7 @@ class Controller
 		$post['table'] = $id_table;
 		// For rights on the demo tables
 		$post['user_id'] = $_SESSION['id_user'];
-		$post['table_id'] = $this->DB->id_table($strTable);
+		$post['table_id'] = $this->Sys->value_where_unique('tables','strtable',$strTable,'id_table');
 		$post['add'] = $post['edit'] = $post['delete'] = 1;
 		$this->Sys->add_line($post,'id_right');
 	}

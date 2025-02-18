@@ -20,10 +20,14 @@ $data[2][0][2]='field2';
 
 Concrete example of a data file in php...
 $data[0][0][1]='persons';
+$data[0][0][2]='cities';
 
 $data[1][0][1]='id_person';
 $data[1][0][2]='name';
 $data[1][0][3]='firstname';
+
+$data[2][0][1]='id_citie';
+$data[2][0][2]='citie';
 
 $data[1][1][1]='1';
 $data[1][1][2]='trump';
@@ -32,6 +36,12 @@ $data[1][1][3]='donald';
 $data[1][2][1]='2';
 $data[1][2][2]='obama';
 $data[1][2][3]='barack';
+  
+$data[2][1][1]='1';
+$data[2][1][2]='montréal';
+  
+$data[2][2][1]='2';
+$data[2][2][2]='new-york';
 </pre>
 
 ## TUTORIAL

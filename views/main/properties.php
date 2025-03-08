@@ -18,11 +18,9 @@
 	<?php if(isset($_SESSION['jsfile'])): ?>
 	JS data file :  <strong><a href="<?php echo WEBROOT.'data/'.$_SESSION['jsfile'];?>" target="_blank"><?=$_SESSION['jsfile']?></a></strong><br>
 	<?php endif; ?>
-	
 	<?php
 	$cols = [2=>'script',3=>'urlaction',4=>'level'];
 	$menu = $sys->select($cols,'scripts');
-
 	echo '<hr>';
 	switch($thead)
 	{
@@ -32,7 +30,7 @@
 		break;
 		default:
 			echo '<div><a href="'.WEBROOT.$controller.'/add_record/'.$thead.'">Add a record</a></div>';
-			//echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
+			echo '<div><a href="'.WEBROOT.$controller.'/show_fields/'.$thead.'">Show fields</a></div>';
 			echo '<hr>';
 			foreach($menu as $m=>$script)
 			{
@@ -43,9 +41,6 @@
 				echo '<div><a href="'.WEBROOT.$controller.'/'.$script[3].'/'.$thead.'">'.ucfirst($script[2]).'</a></div>';	
 			}
 	}
-
-	/* exemple : echo '<div><small><a href="'.WEBROOT.$controller.'/empty_table/'.$thead.'">Empty the current table</a></small></div>';*/
 	?>
-	
 	</div>
 </div>

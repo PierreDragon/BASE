@@ -1,0 +1,15 @@
+{
+    "name": "webiciel/base",
+    "description": "NO SQL PHP datafiles",
+    "type": "project",
+    "require": {
+        "php": "8.4"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pierre Martin"
+        }
+    ],
+    "minimum-stability": "stable"
+}

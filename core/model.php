@@ -1,6 +1,5 @@
 <?php  
 namespace Core;
-
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
@@ -25,7 +24,6 @@ class Model
 	public $primary;
 	public $table_nbrlines;
 	public $table_nbrcolumns;
-	
 	public function connect($path,$file,$ext='php')
 	{
 		$this->datapath = $path;
@@ -134,16 +132,13 @@ class Model
 		 	$msg = 'The table ['.$strTable.'] already exists.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif(empty($strTable) || !(ctype_alpha($strTable)) || !(ctype_lower($strTable)) ||  strlen($strTable) < 4 || !($this->right($strTable,1)=='s'))
 		{
 			$msg = 'The table name must be lowercase, plural, contain only alphabetic characters and have a minimum of 4 caracters.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-	
 		$new=1;
 		if(!empty($this->data))
 		{
@@ -159,7 +154,6 @@ class Model
 				}
 			}
 		}
-		
 		$this->data[0][0][$new] = $strTable;
 		$substr = substr($this->data[0][0][$new], 0, -1);
 		// Automatically add a primary column when adding a table
@@ -167,7 +161,6 @@ class Model
 		$this->n_tables = $new;
 		return $this->save();
 	}
-	
 	public function copy_table($strTable)
 	{		
 		$table = $this->id_table($strTable);
@@ -214,27 +207,23 @@ class Model
 		array_unshift($this->data[$table][0], 'id_'.$strKey);
 		$this->save();
 	}
-	
 	public function primary_key($strTable,$line)
 	{
 		$table = $this->id_table($strTable);
 		return $this->data[$table][$line][PRIMARY];
 	}
-
 	public function edit_table($table,$strTable)
 	{
 		if($this->valid_rule($table,1))
 		{
 			$msg = 'A foreigh key constraint in the rules table does not allow the edition of this table.';
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif(empty($strTable) || !(ctype_alpha($strTable)) || !(ctype_lower($strTable)) ||  strlen($strTable) < 4 || !($this->right($strTable,1)=='s'))
 		{
 			$msg = 'The table name must be lowercase, plural, contain only alphabetic characters and have a minimum of 4 caracters.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//$this->data[0][0][$table] = strtolower($strTable);\
 		$this->data[0][0][$table] = $strTable;
@@ -251,14 +240,12 @@ class Model
 		{
 			$msg = 'A foreigh key constraint in the rules table does not allow the deletion of this table.';
 			throw new \Exception($msg);
-			exit;
 		}
 		unset($this->data[$table]);
 		unset($this->data[0][0][$table]);
 		ksort($this->data);
 		$this->save();
 	}	
-	
 	function empty_table($table)
 	{
 		if(!is_numeric($table))
@@ -280,13 +267,11 @@ class Model
 		{
 			$table = $this->id_table($table);
 		}
-		
 		if( empty($table) || empty($strColumn))
 		{
 			$msg = 'The fieldname must contain only alphabetic characters. Add <em>_id</em> suffix if you want to referring to a master table key. See table rules.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif($this->verif_alpha_underscore($strColumn) && !$this->valid_foreign_key($strColumn))
 		{
@@ -294,14 +279,12 @@ class Model
 			$msg .= 'and must referencing an existing master in the rules table.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif($this->column_exists($table,$strColumn))
 		{
 			$msg = 'Column ['.$strColumn.'] already exists !';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$n_columns = $this->count_columns($table);
 		$this->data[$table][0][$n_columns+1] = $strColumn;
@@ -314,7 +297,6 @@ class Model
 		$this->save();
 		return true;
 	}
-	
 	public function edit_column($table,$column,$strColumn)
 	{
 		if(!is_numeric($table))
@@ -330,7 +312,6 @@ class Model
 			$msg = 'The fieldname must contain only alphabetic characters. Add <em>_id</em> suffix if you want to referring to a master table key. See table rules.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif($this->verif_alpha_underscore($strColumn) && !$this->valid_foreign_key($strColumn))
 		{
@@ -340,7 +321,6 @@ class Model
 				$msg .= 'and must referencing an existing master in the rules table.';
 				$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 				throw new \Exception($msg);
-				exit;
 			}
 		}
 		$this->set_cell($table,0,$column,$strColumn);
@@ -356,7 +336,6 @@ class Model
 		{
 			$column = $this->id_column($table,$column);
 		}
-		
 		if($this->valid_rule($table,$column))
 		{
 			$msg = 'A foreigh key constraint in the rules table does not allow the deletion of this key.';
@@ -386,7 +365,6 @@ class Model
 		}
 		$this->save();
 	}
-
 	public function switch_column($strTable,$strCol1,$strCol2)
 	{
 		if(empty($strTable) || empty($strCol1) || empty($strCol2))
@@ -398,14 +376,11 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		$table = $this->id_table($strTable);
 		$nbrLigne = $this->count_lines($table);
 		$col1 = $this->id_column($table,$strCol1);
 		$col2 = $this->id_column($table,$strCol2);
-		
 		for( $line = 0; $line <= $nbrLigne; $line++ )
 		{
 			$temp = $this->data[$table][$line][$col1];
@@ -414,7 +389,6 @@ class Model
 		}
 		$this->save();
 	}  
-	
 	public function column_name($table,$column)
 	{
 		$return = false;
@@ -428,7 +402,6 @@ class Model
 		} 
 		return $return;
 	}
-	
 	public function columns($table)
 	{
 		$return = false;
@@ -442,7 +415,6 @@ class Model
 		}
 		return $return;
 	}
-	
 	public function column_exists($table,$strColumn)
 	{
 		$return = false;
@@ -485,14 +457,12 @@ class Model
 			$msg ='Concat two or more columns';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif(!$this->column_exists($table,$strToColumn))
 		{
 			$msg ='Field '.$strToColumn.' from '.$this->colorize($strTable,'red').' does not exists!';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$filter = explode(',',$filter);
 		foreach($filter as $c=>$field)
@@ -641,7 +611,6 @@ class Model
 		}
 		return $return;
 	}
-	
 	public function line($table,$line)
 	{
 		$return = false;
@@ -668,7 +637,6 @@ class Model
 			$msg ='';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		elseif(is_numeric($post['table']))
 		{
@@ -679,18 +647,15 @@ class Model
 			$strTable = $post['table'];
 		}
 		$mandatory =  $this->primary_column($strTable);
-	
 		if(empty($post[$mandatory]))
 		{
 			$msg ='A mandatory field is not set !';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $post['table'];
 		$line = $post['line'];
 		unset($post['table'],$post['line']);
-		
 		if(!is_numeric($table))
 		{
 			$table = $this->id_table($table);
@@ -737,14 +702,12 @@ class Model
 		$this->repair_table($post['table']);
 		$n_lines = $this->count_lines($post['table']);
 		$post['line'] = ++$n_lines;
-
 		if(empty($post[$mandatory]))
 		{
 			$strTable = $this->table_name($post['table']);
 			$last = $this->last_number($strTable,$mandatory);
 			$post[$mandatory] = $last+1;
 		}
-
 		return $this->set_line($post);
 	}
 	public function del_line($table,$line)
@@ -765,7 +728,6 @@ class Model
 			throw new \Exception($msg);
 		}
 	}
-	
 	public function add_record($post)
 	{
 		if(empty($post['table']))
@@ -786,7 +748,6 @@ class Model
 		}
 		return $this->set_line($post);
 	}
-	
 	public function del_lines_where($strTable,$strColumn,$op='==',$multiple='',$strKeyCol='')
 	{
 		//if(!$this->table_exists($strTable) || empty($strColumn) ||  empty($op) ||  empty($multiple) || empty($strKeyCol))
@@ -796,10 +757,8 @@ class Model
 			$msg.= 'then write the according value of this field (string $b) that you will use to delete unwanted records with '; 
 			$msg.= 'a conditional operator and a key column that contains a unique value. ';
 			$msg.= 'It could be any field that contains unique value and it is mandatory to reconstruct the table properly. ';
-			
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$records =  $this->where_multiple($strTable,$strColumn,$op,$multiple);
@@ -828,7 +787,6 @@ class Model
 			$msg = 'The table does not exist!';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$tab = $this->id_table($strTable);
 		$i = count($this->data[$tab])-1;
@@ -843,22 +801,17 @@ class Model
 		}
 		return $return;
 	}
-	
 	public function last_number($strTable,$strColumn):int
 	{
 		$last = 0;
-				
 		if(!$this->table_exists($strTable))
 		{
 			$msg = 'The table does not exist!';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		$tab = $this->id_table($strTable);
 		$col = $this->id_column($tab,$strColumn);
-
 		foreach($this->data[$tab] as $rec)
 		{
 			if(is_numeric($rec[$col]) && $rec[$col] > $last)
@@ -868,7 +821,6 @@ class Model
 		}
 		return (int)$last;
 	}
-	
 	public function real_id($table,$strColumn,$unique)
 	{
 		$return = false;
@@ -882,7 +834,6 @@ class Model
 			$msg = 'This realId doesn\'t exists.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		foreach( $this->data[$table] as $index=>$record )
 		{	
@@ -928,7 +879,6 @@ class Model
 			$msg = 'Error combining columns and data!';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 	}
 	public function where_unique($strTable,$strColumn,$unique)
@@ -954,7 +904,6 @@ class Model
 		}
 		return $return;
 	}
-	
 	public function is_unique($strTable,$strColumn,$unique)
 	{
 		$return = true;
@@ -1063,7 +1012,6 @@ class Model
 							$return[$realID] = $record;
 						}
 					break;
-					
 					/* $a <=> $b	Spaceship	An integer less than, equal to, or greater than zero when $a is
 					respectively less than, equal to, or greater than $b.
 					case '<=>':
@@ -1072,14 +1020,12 @@ class Model
 							$return[$realID] = $record;
 						}
 					break;*/
-					
 					case 'BETWEEN':
 							if( str_contains($multiple,',') == false )
 							{
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$multiple);
 							if($record[$column] >= $test[0] && $record[$column] <= $test[1])
@@ -1093,7 +1039,6 @@ class Model
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$multiple);
 							foreach($test as $tes)
@@ -1128,7 +1073,6 @@ class Model
 	{
 		return $this->where_multiple($strTable,$strColumn,$op,$value);
 	}
-	
 	public function record_exists($strTable,$myRecord)
 	{
 		$records = $this->table($strTable);
@@ -1143,7 +1087,6 @@ class Model
 		}
 		return false;
 	}
-	
 	public function value_where_unique($strTable,$strColumn,$unique,$strField)
 	{
 		$return = null;
@@ -1201,7 +1144,6 @@ class Model
 		}
 		return $result;
 	}
-	
 	public function escape(&$mixed)
 	{
 		if (is_array($mixed))
@@ -1255,7 +1197,6 @@ class Model
 			$mixed = str_replace("&#047;","/", $mixed);
 		}
 	}
-	
 	function verif_alpha_underscore($str)
 	{
 		$result = false;
@@ -1265,7 +1206,6 @@ class Model
 		}
 		return $result;
 	}
-
 	function record($strTable,$line)
 	{
 		$idTable = $this->id_table($strTable);
@@ -1325,7 +1265,6 @@ class Model
 		$columns = $this->filter_columns($cols,$columns);
 		$select = array();
 		$records = $this->where($strTable,$strColumn,$op,$value);
-
 		foreach($records as $i=>$record)
 		{
 			foreach($columns as $c=>$col)
@@ -1409,7 +1348,6 @@ class Model
 		}
 		return $sum;
 	}
-	
 	function math_column_where($strTable,$strColumn,$math, $string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($math) || empty($string) || empty($op))
@@ -1421,7 +1359,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -1435,7 +1372,6 @@ class Model
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		if($math == "+1")
 		{
@@ -1449,7 +1385,6 @@ class Model
 			// increment_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
 			return true;
 		}
-		
 		$sum = 0;
 		$avg= 0;
 		$counter = 0;
@@ -1461,7 +1396,6 @@ class Model
 			$value = '';
 		}
 		$tab = $this->data[$table];
-
 		foreach($tab as $i=>$rec)
 		{
 			if($i==0) continue;
@@ -1472,7 +1406,6 @@ class Model
 					if(empty($this->data[$table][$i][$column])) continue;
 					$this->data[$table][$i][$column] = preg_replace('/[^0-9.]/', '', $this->data[$table][$i][$column]);
 					//$this->data[$table][$i][$column] = floatval($this->data[$table][$i][$column] );
-					
 					switch($op)
 					{
 						case '==':
@@ -1640,7 +1573,6 @@ class Model
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -1665,10 +1597,8 @@ class Model
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
-							
 							foreach($test as $tes)
 							{
 								if($this->data[$table][$i][$fieldwhere] == $tes)
@@ -1748,7 +1678,6 @@ class Model
 		}
 		return $result;
 	}
-
 	function sub($strTable,$strColumnToSub,$strColumn=null,$intKey=null)
 	{
 		$sub = 0;
@@ -1794,16 +1723,13 @@ class Model
 	{
 		return substr($str, 0, $length);
 	}
- 
 	function right($str, $length) 
 	{
 		return substr($str, -$length);
 	}
-
 	function valid_rule($table,$column)
 	{
 		$return = false;		
-		
 		if(!is_numeric($table))
 		{
 			$table = $this->id_table($table);
@@ -1812,9 +1738,7 @@ class Model
 		{
 			$column = $this->id_column($table,$column);
 		}
-		
 		$strColumn=$this->column_name($table,$column);
-		
 		if(stripos($strColumn,'_') != false)
 		{
 			$lenstr = strlen($strColumn);
@@ -1864,7 +1788,6 @@ class Model
 		}
 		return $return;
 	}	
-	
 	public function check_rule($str,$key)
 	{
 		$master = $str;
@@ -1908,7 +1831,6 @@ class Model
 		}
 		//$this->save();
 	}
-	
 	public function time_corrector($strTable,$strColumn,$format)
 	{
 		if(empty($strTable) || empty($strColumn))
@@ -1916,7 +1838,6 @@ class Model
 			$msg = 'To fix a column choose a time column and identify the format. It will transform as HH:MM:SS'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$column = $this->id_column($table,$strColumn);		
@@ -1931,7 +1852,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function valid_time($string,$format='H:i:s')
 	{
 		$return = '';
@@ -1946,7 +1866,6 @@ class Model
 		}
 		return $return;
 	}
-	
 	public function date_corrector($strTable,$strColumn,$format)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($format))
@@ -1954,7 +1873,6 @@ class Model
 			$msg = 'To fix a column choose a column and identify the format. It will transform as YYYY-MM-DD'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$column = $this->id_column($table,$strColumn);		
@@ -2114,7 +2032,6 @@ class Model
 		$this->table_nbrlines = $this->count_lines($this->table);
 		$this->table_nbrcolumns = $this->count_columns($this->table);
 	}
-	
 	function all($col=false)
 	{
 		$recordset = $this->get_table($this->id_table);
@@ -2124,7 +2041,6 @@ class Model
 		}
 		return $recordset;
 	}
-	
 	public function find_replace($strTable,$strColumn,$find=' ',$replace=' ')
 	{
 		//$bodytag = str_ireplace("%body%", "black", "<body text=%BODY%
@@ -2134,7 +2050,6 @@ class Model
 			$msg = 'Search a column, find and replace.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}	
 		$table = $this->id_table($strTable);
 		$rows = $this->get_table($table);
@@ -2155,7 +2070,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function copy_column($strTable,$strColumnFrom,$strColumnTo)
 	{
 		if(empty($strTable) || empty($strColumnFrom) || empty($strColumnTo))
@@ -2163,7 +2077,6 @@ class Model
 			$msg = 'To duplicate a column you need to identify the column that you want to duplicate, named the new column. '; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$from = $this->id_column($table,$strColumnFrom);
@@ -2186,7 +2099,6 @@ class Model
 			$msg .= 'You will need to set how much left and right caracters you want to keep.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$from = $this->id_column($table,$strColumnFrom);
@@ -2199,7 +2111,6 @@ class Model
 			$strFrom =  $this->data[$table][$i][$from];
 			$strFrom = trim(preg_replace('/\s+/', ' ', $strFrom));
 			$lengthFrom = strlen($strFrom);
-		
 			if($left > 0 and $right > 0)
 			{
 				//var_dump($lengthFrom); 
@@ -2255,7 +2166,6 @@ class Model
 			$msg = 'To split a column you need to identify the column that you want to work with, named the new column. '; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$from = $this->id_column($table,$strColumnFrom);
@@ -2268,14 +2178,11 @@ class Model
 			$strFrom =  $this->data[$table][$i][$from];
 			$strFrom = trim(preg_replace('/\s+/', ' ', $strFrom));
 			$lengthFrom = strlen($strFrom);
-			
 			if(empty($needle))
 			{
 				$needle = ' ';
 			}
-
 			$pos = stripos($strFrom,$needle);
-
 			if($pos === false)
 			{
 				$left = $lengthFrom;
@@ -2286,7 +2193,6 @@ class Model
 				$left = $pos; 
 				$right = $lengthFrom - $left;
 			}
-		
 			if($left > 0 and $right > 0)
 			{
 				//var_dump($lengthFrom); 
@@ -2329,7 +2235,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$totable = $this->id_table($strToTable);
@@ -2341,7 +2246,6 @@ class Model
 		while($i < $count)   
 		{
 			$this->data[$totable][$i][1] = $i;
-			
 			if(isset($this->data[$table][$i][$from]))
 			{
 				$this->data[$totable][$i][$to] = $this->data[$table][$i][$from];	
@@ -2355,7 +2259,6 @@ class Model
 		$this->save();
 		$this->delete_column($table,$from);
 	}
-	
 	public function copy_column_keys($strTable,$strColumn,$strToTable,$strToField,$string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn)  || empty($strToTable) || empty($strToField)  || empty($string) || empty($op))
@@ -2368,11 +2271,9 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
-
 		if($this->column_exists($table,$strColumn) && $this->column_exists($table,$string))
 		{
 			$column = $this->id_column($table,$strColumn);
@@ -2386,9 +2287,7 @@ class Model
 			$msg = 'The column '.$strColumn.' or '.$strToField.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		$tab = $this->data[$table];
 		if(empty($value))
 		{
@@ -2470,7 +2369,6 @@ class Model
 								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -2484,7 +2382,6 @@ class Model
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -2512,7 +2409,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function copy_data_keys($strTable,$strColumn,$strToTable,$strToField,$left,$right,$string,$op='==',$value='')
 	{
 		if(empty($strTable) || empty($strColumn)  || empty($strToTable) || empty($strToField)  || empty($left) || empty($right) || empty($string) || empty($op))
@@ -2524,7 +2420,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -2533,11 +2428,9 @@ class Model
 		{
 			$column = $this->id_column($table,$strColumn);
 			$keyleft = $this->id_column($table,$left);	
-			
 			$totable = $this->id_table($strToTable);
 			$tofield = $this->id_column($totable,$strToField);
 			$keyright = $this->id_column($totable,$right);
-			
 			$fieldwhere = $this->id_column($table,$string);
 			$maxnbrlines = $this->count_lines($totable);
 		}
@@ -2546,9 +2439,7 @@ class Model
 			$msg = 'The column '.$strColumn.' or '.$strToField.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		$tab = $this->data[$table];
 		$totab = $this->data[$totable];
 		if(empty($value))
@@ -2561,7 +2452,6 @@ class Model
 			foreach($totab as $j=>$sec)
 			{
 				if($j==0) continue;
-					
 				if($this->data[$table][$i][$keyleft] == $this->data[$totable][$j][$keyright])
 				{
 					switch($op)
@@ -2626,7 +2516,6 @@ class Model
 								$msg = 'When the operator is BETWEEN the values provided must be numeric and separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -2640,7 +2529,6 @@ class Model
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -2668,7 +2556,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function move_one_to_many($strTable,$strColumn,$strToTable,$strToTableKey,$strTableKey)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($strToTable) || empty($strTableKey) || empty($strToTableKey) || !$this->table_exists($strToTable))
@@ -2681,7 +2568,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -2711,7 +2597,6 @@ class Model
 		$this->save();
 		$this->delete_column($table,$from);
 	}
-	
 	public function colorize($string,$color)
 	{
 		return '<span style="color:'.$color.';"> '.$string.' </span>';
@@ -2722,15 +2607,11 @@ class Model
 		$tab = $this->id_table($strTable);
 		$col = $this->id_column($tab,$strColumn);				
 		$lines = $this->count_lines($tab);	
-		
 		$datas = $this->data[$tab];
 		$columns = $this->data[$tab][0];
-	
 		foreach($datas as $key=>$row)
 		{
-			
 			if($key==0) continue;
-
 			try
 			{
 				$dat[$key] = $this->combine($columns,$row);
@@ -2752,7 +2633,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function merge_rows($strTable,$strColKey,$strColOrder,$strColResult)
 	{
 		if(empty($strTable) || empty($strColKey)  || empty($strColOrder) || empty($strColResult))
@@ -2764,7 +2644,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$table = $this->id_table($strTable);
 		$colkey = $this->id_column($table,$strColKey);
@@ -2805,7 +2684,6 @@ class Model
 		//$this->save();
 		$this->repair_table($table);
 	}
-	
 	public function repair_table($table)
 	{
 		$j=1;
@@ -2823,7 +2701,6 @@ class Model
 		ksort($this->data,SORT_NUMERIC);
 		$this->save();
 	}
-	
 	public function del_duplicates($table,$column)
 	{
 		if(empty($column))
@@ -2831,7 +2708,6 @@ class Model
 			$msg = 'To delete duplicates from a table. You need to identify the field you want to work with'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		if(!is_numeric($table))
 		{
@@ -2872,7 +2748,6 @@ class Model
 		}
 		return $result;
 	}
- 
 	public function check_system()
 	{
 		$i=1;
@@ -2882,12 +2757,10 @@ class Model
 			{
 				$msg = 'ERROR[1] Something break the system between [0][0][1] (table name) and [1][0][1] (table usage). <a href="'.WEBROOT.'main/ini">Initialize</a>'; 
 				throw new \Exception($msg);
-				exit;
 			}
 			++$i;
 		}
 	}
-	
 	public function renumber($strTable,$strColumn,$start=1)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($start))
@@ -2895,7 +2768,6 @@ class Model
 			$msg = 'It is not a must but the best practice would be to duplicate a column before.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//$this->save(true);
 		$table = $this->id_table($strTable);
@@ -2913,7 +2785,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 	public function matches($strMaster,$strMasterOldColumn,$strSlave,$strSlaveOldColumn,$strMasterNewNumbersColumn)
 	{
 		if(empty($strMaster) || empty($strMasterOldColumn) || empty($strSlave) || empty($strSlaveOldColumn) || empty($strMasterNewNumbersColumn))
@@ -2921,20 +2792,17 @@ class Model
 			$msg = "Reassign key values of a column in a slave table against new values in the master table. First you will need to duplicate a column in $strMaster and renumber it.";
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$id_master = $this->id_table($strMaster);
 		$mrecords = $this->get_table($id_master);
 		$id_m_old_column = $this->id_column($id_master,$strMasterOldColumn);
 		$id_m_newnumbers_column = $this->id_column($id_master,$strMasterNewNumbersColumn);
-
 		$id_slave = $this->id_table($strSlave);
 		$srecords = $this->get_table($id_slave);
 		$id_s_old_column = $this->id_column($id_slave,$strSlaveOldColumn);
 		//erase column row header
 		unset($mrecords[0]);
 		unset($srecords[0]);
-		
 		foreach($mrecords as $m=>$mrec)
 		{
 			foreach($srecords as $s=>$srec)
@@ -2948,7 +2816,6 @@ class Model
 		//$this->preprint($this->data[$id_slave]); 
 		$this->save();
 	}
-	
 	public function copy_text_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
@@ -2960,7 +2827,6 @@ class Model
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -2974,15 +2840,12 @@ class Model
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		if(empty($value))
 		{
 			$value = '';
 		}
 		$tab = $this->data[$table];
-
 		foreach($tab as $i=>$rec)
 		{
 			if($i==0) continue;
@@ -3058,7 +2921,6 @@ class Model
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -3072,7 +2934,6 @@ class Model
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -3100,7 +2961,6 @@ class Model
 		}
 		$this->save();
 	}
-	
 public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($string) || empty($op))
@@ -3112,7 +2972,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -3126,15 +2985,12 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		if(empty($value))
 		{
 			$value = '';
 		}
 		$tab = $this->data[$table];
-
 		foreach($tab as $i=>$rec)
 		{
 			if($i==0) continue;
@@ -3210,7 +3066,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -3224,7 +3079,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -3263,7 +3117,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -3277,7 +3130,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$text = intval($text);
 		if(empty($value))
@@ -3285,7 +3137,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$value = '';
 		}
 		$tab = $this->data[$table];
-
 		foreach($tab as $i=>$rec)
 		{
 			if($i==0) continue;
@@ -3361,7 +3212,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -3375,7 +3225,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -3403,7 +3252,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 		}
 		$this->save();
 	}
-	
 	public function decrement_where($strTable,$strColumn,$text,$string,$op='==',$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($text) || empty($string) || empty($op))
@@ -3415,7 +3263,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -3429,7 +3276,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		$text = intval($text);
 		if(empty($value))
@@ -3437,7 +3283,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$value = '';
 		}
 		$tab = $this->data[$table];
-
 		foreach($tab as $i=>$rec)
 		{
 			if($i==0) continue;
@@ -3513,7 +3358,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -3527,7 +3371,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
 								$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 								throw new \Exception($msg);
-								exit;
 							}
 							$test = explode(',',$value);
 							foreach($test as $tes)
@@ -3555,7 +3398,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 		}
 		$this->save();
 	}
-	
 	public function reverse_sequence_where($strTable,$strColumn,$value=null)
 	{
 		if(empty($strTable) || empty($strColumn) || empty($value) )
@@ -3567,7 +3409,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			}
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
 		//FROM TABLE
 		$table = $this->id_table($strTable);
@@ -3581,9 +3422,7 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new \Exception($msg);
-			exit;
 		}
-		
 		if(empty($value))
 		{
 			$value = '';
@@ -3603,7 +3442,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 						$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
 						$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 						throw new \Exception($msg);
-						exit;
 					}
 					//echo 'here!';exit;
 					if($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1])
@@ -3616,7 +3454,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 		}
 		$this->save();
 	}
-	
 	public function preprint($array)
 	{
 		echo '<pre>';
@@ -3628,7 +3465,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 	{
 		$this->cleanup();
 	}
-
 	public function cleanup() 
 	{
 		foreach ($this as $key => $value) 
@@ -3741,7 +3577,6 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 		chr(197).chr(188) => 'z', chr(197).chr(189) => 'Z',
 		chr(197).chr(190) => 'z', chr(197).chr(191) => 's'
 		);
-
 		if(!empty($string))
 		{
 			$string = strtr($string, $chars);

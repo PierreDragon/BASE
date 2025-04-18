@@ -2811,5 +2811,44 @@ class Controller
 			exit;
 		}
 	}
+	function replace_name_with_id($url)
+	{
+		$this->action_level(__FUNCTION__);
+		
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			//replace_name_with_id($strTableFrom, $strTableTo, $strColumnFrom,$strColumnTo,$compare = 2) 
+			@$this->DB->replace_name_with_id($strTable,$post['strfield'],$post['totable'],$post['tofield']);
+			$this->Msg->set_msg('You replace column '.$post['strfield'].' to  '.$post['tofield']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$post['totable']);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Replace a text value for _id, from table '.$strTable.' to another table column by matching condition.';
+		$this->data['placeholder'] = 'Copy a column to another';
+
+		$this->data['columns'] = $this->actions;
+
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,NULL,' : This column to be copy to another');
+		$this->data['listtotables'] = $this->Template->dropdown($this->Sys,'tables','totable',2,NULL,FALSE,NULL,' : The table that will receive the column. It can be the same table which is '.$strTable);
+		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,NULL,'tofield',NULL,FALSE,NULL,' : The column that will receive the copy. It should already be created.');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/replace_name_with_id/'.$strTable;
+		$this->data['content'] = $this->Template->load('replace-name-with-id', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
 }	
 ?>

@@ -2070,6 +2070,142 @@ class Model
 		}
 		$this->save();
 	}
+
+	/*function replace_name_with_id($strTableFrom, $strColumnFrom, $strTableTo, $strColumnTo, $compare = 2) 
+	{
+		if(empty($strTableFrom) || empty($strColumnFrom))
+		{
+			$msg = 'Search a column, find and replace.'; 
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		$FromTableIndex = $this->id_table($strTableFrom);
+		$FromColumnIndex = $this->id_column($strTableFrom, $strColumnFrom);    
+		$ToTableIndex = $this->id_table($strTableTo);    
+		$ToColumnIndex = $this->id_column($strTableTo, $strColumnTo);    
+		
+		// Créer un tableau associatif des clients (nom => id)
+		$customerMap = [];
+		for ($i = 1; isset($this->data[$FromTableIndex][$i]); $i++)
+		{
+			$customerId = $this->data[$FromTableIndex][$i][$FromColumnIndex];
+			$customerName = $this->data[$FromTableIndex][$i][$compare];
+			$customerMap[$customerName] = $customerId;
+		}
+		
+		// Parcourir la table copyprojets et remplacer le nom par l'id
+		for ($i = 1; isset($this->data[$ToTableIndex][$i]); $i++) 
+		{
+			$customerName = $this->data[$ToTableIndex][$i][$ToColumnIndex];
+			
+			// Si le nom du client existe dans la table customers, le remplacer par son ID
+			if (!empty($customerName) && isset($customerMap[$customerName]))
+			{
+				$this->data[$ToTableIndex][$i][$ToColumnIndex] = $customerMap[$customerName];
+			} 
+			else
+			{
+				// Si le client n'est pas trouvé ou que le champ est vide, garder la valeur actuelle
+				$this->data[$ToTableIndex][$i][$ToColumnIndex] = !empty($customerName) ? '0' : '';
+			}
+		}
+		$this->save();
+	}*/
+	function replace_name_with_id($strTableFrom, $strColumnFrom, $strTableTo, $strColumnTo, $compare = 2) 
+	{
+		// Vérification des paramètres de base
+		if(empty($strTableFrom) || empty($strColumnFrom))
+		{
+			$msg = 'Search a column, find and replace.'; 
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		// Vérification des tables et colonnes
+		$FromTableIndex = $this->id_table($strTableFrom);
+		if($FromTableIndex === false) {
+			throw new \Exception("Table source '$strTableFrom' non trouvée.");
+		}
+		
+		$FromColumnIndex = $this->id_column($strTableFrom, $strColumnFrom);
+		if($FromColumnIndex === false) {
+			throw new \Exception("Colonne source '$strColumnFrom' non trouvée.");
+		}
+		
+		$ToTableIndex = $this->id_table($strTableTo);
+		if($ToTableIndex === false) {
+			throw new \Exception("Table destination '$strTableTo' non trouvée.");
+		}
+		
+		$ToColumnIndex = $this->id_column($strTableTo, $strColumnTo);
+		if($ToColumnIndex === false) {
+			throw new \Exception("Colonne destination '$strColumnTo' non trouvée.");
+		}
+		
+		// Créer un tableau associatif des clients (nom => id)
+		$customerMap = [];
+		$errors = [];
+		
+		for ($i = 1; isset($this->data[$FromTableIndex][$i]); $i++)
+		{
+			try {
+				if(isset($this->data[$FromTableIndex][$i][$FromColumnIndex]) && 
+				   isset($this->data[$FromTableIndex][$i][$compare])) {
+					$customerId = $this->data[$FromTableIndex][$i][$FromColumnIndex];
+					$customerName = $this->data[$FromTableIndex][$i][$compare];
+					$customerMap[$customerName] = $customerId;
+				}
+			} catch (\Exception $e) {
+				// Noter l'erreur mais continuer
+				$errors[] = "Erreur ligne $i: " . $e->getMessage();
+				continue;
+			}
+		}
+		
+		// Parcourir la table copyprojets et remplacer le nom par l'id
+		for ($i = 1; isset($this->data[$ToTableIndex][$i]); $i++) 
+		{
+			try {
+				if(isset($this->data[$ToTableIndex][$i][$ToColumnIndex])) {
+					$customerName = $this->data[$ToTableIndex][$i][$ToColumnIndex];
+					
+					// Si le nom du client existe dans la table customers, le remplacer par son ID
+					if (!empty($customerName) && isset($customerMap[$customerName]))
+					{
+						$this->data[$ToTableIndex][$i][$ToColumnIndex] = $customerMap[$customerName];
+					} 
+					else
+					{
+						// Si le client n'est pas trouvé ou que le champ est vide, garder la valeur actuelle
+						if (!empty($customerName)) {
+							$errors[] = "Client '$customerName' non trouvé dans la table source.";
+							$this->data[$ToTableIndex][$i][$ToColumnIndex] = '0';
+						} else {
+							$this->data[$ToTableIndex][$i][$ToColumnIndex] = '';
+						}
+					}
+				}
+			} catch (\Exception $e) {
+				// Noter l'erreur mais continuer
+				$errors[] = "Erreur ligne $i: " . $e->getMessage();
+				continue;
+			}
+		}
+		
+		// S'il y a des erreurs, informer l'utilisateur mais ne pas arrêter le traitement
+		if (!empty($errors)) {
+			$errorMsg = implode("<br>", $errors);
+			$this->Msg->set_msg("Certains enregistrements n'ont pas pu être traités:<br>" . $errorMsg);
+		}
+		
+		// Sauvegarder les modifications
+		if ($this->save()) {
+			return true;
+		} else {
+			throw new \Exception("Erreur lors de la sauvegarde des données.");
+		}
+	}
 	public function copy_column($strTable,$strColumnFrom,$strColumnTo)
 	{
 		if(empty($strTable) || empty($strColumnFrom) || empty($strColumnTo))

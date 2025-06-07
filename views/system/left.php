@@ -1,8 +1,10 @@
 <div class="panel panel-default">
 	<div class="panel-heading">
 		<div class="panel-title">Tables</div> 
-		<a href="<?php echo WEBROOT.$link;?>/ini" title="Initialize">Initialize</a>  
-		<!-- |a href="<?php echo WEBROOT.$link;?>/add_table">Add a table</a-->
+		<a href="<?php echo WEBROOT.$link;?>/demo" title="Demo">Demo</a> | 
+		<a href="<?php echo WEBROOT.$link;?>/ini" title="Initialize">Initialize</a> | 
+		<a href="<?php echo WEBROOT.$link;?>/synchronize" title="Synchronize">Synchronize</a> | 
+		<a href="<?php echo WEBROOT.$link;?>/add_table">Add a table</a>
 	</div>
 	<div class="panel-body">
 		<?php 

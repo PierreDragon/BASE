@@ -4,16 +4,16 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Controller
-* @version:	11.1
+* @version:	11.2
 * @author: info@webiciel.ca
 * @php: 8
-* @revision: 2025-02-13 10:59 AM
-* @debug add_right function
+* @review: 2024-06-07 11:30
+* @changes Added move_column_after() and move_column_before() with full base-1 index support
 * @licence MIT
 */
 class Controller
 {
-	public static $version = '11.0';
+	public static $version = '11.2';
 	protected $data = array();
 	public $path,$Sys,$Msg,$DB,$Template;
 	protected $actions = [1=>'id_action',2=>'action',3=>'strtable',4=>'strfield',5=>'totable',6=>'tofield',7=>'left',8=>'right',9=>'string',10=>'operator',11=>'value',12=>'unique'];
@@ -148,6 +148,7 @@ class Controller
 		$this->data['content'] = $this->Template->load('add', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+
 	function edit_table($url)
 	{
 		$this->action_level(__FUNCTION__);
@@ -1044,10 +1045,16 @@ class Controller
 		require_once(ROOT.'models/'.strtolower($name).'.php');
 		$this->$name = new $name();
 	}
-	function load_class($name)
+	function load_class($name, ...$args)
 	{
-		require_once(ROOT.'classes/'.strtolower($name).'.php');
-		$this->$name = new $name();
+		require_once(ROOT . 'classes/' . strtolower($name) . '.php');
+
+		// 🔧 Crée l'objet avec arguments si nécessaires
+		$reflect = new \ReflectionClass($name);
+		$instance = $reflect->newInstanceArgs($args);
+
+		// ✅ Stocke proprement dans une propriété déclarée
+		$this->$name = $instance;
 	}
 	function bkp()
 	{
@@ -1712,6 +1719,80 @@ class Controller
 		$this->data['content'] = $this->Template->load('switch-column', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
 	}
+	function move_column_after($url)
+	{
+		$this->action_level(__FUNCTION__);
+		
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			@$this->DB->move_column_after($strTable,$post['strfield'],$post['tofield']);
+			$this->Msg->set_msg('You switched column '.$post['strfield'].' after  '.$post['tofield']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : switch column after another.';
+		$this->data['placeholder'] = 'Switch column after another ';
+
+		$this->data['columns'] = $this->actions;
+
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column A',' : This column to be move');
+		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,$strTable,'tofield',NULL,FALSE,'column B',' : The field that will serve for switching');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/move_column_after/'.$strTable;
+		$this->data['content'] = $this->Template->load('move-column-after', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
+	function move_column_before($url)
+	{
+		$this->action_level(__FUNCTION__);
+		
+		$strTable=$url[TABLE];
+		$this->properties('left',$strTable);
+		$post = @$_POST;
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			@$this->DB->move_column_before($strTable,$post['strfield'],$post['tofield']);
+			$this->Msg->set_msg('You switched column '.$post['strfield'].' before  '.$post['tofield']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : switch column before another.';
+		$this->data['placeholder'] = 'Switch column before another ';
+
+		$this->data['columns'] = $this->actions;
+
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB,$strTable,'strfield',NULL,FALSE,'column A',' : This column to be move');
+		$this->data['listtofields'] = $this->Template->cdropdown($this->DB,$strTable,'tofield',NULL,FALSE,'column B',' : The field that will serve for switching');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/move_column_before/'.$strTable;
+		$this->data['content'] = $this->Template->load('move-column-before', $this->data,TRUE);
+		$this->Template->load('layout',$this->data);
+	}
 	function merge_rows($url)
 	{
 		$this->action_level(__FUNCTION__);
@@ -2324,6 +2405,8 @@ class Controller
 	
 	function synchronize()
 	{
+		//$this->action_level(__FUNCTION__);
+
 		$answer = @$_POST['inlineRadioOptions'];
 		if(!isset($answer))
 		{
@@ -2849,6 +2932,139 @@ class Controller
 		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/replace_name_with_id/'.$strTable;
 		$this->data['content'] = $this->Template->load('replace-name-with-id', $this->data,TRUE);
 		$this->Template->load('layout',$this->data);
+	}
+
+	function uppercase_text_where($url)
+	{
+		$this->action_level(__FUNCTION__);
+		
+		$strTable = $url[TABLE];
+		$this->properties('left', $strTable);
+		$post = @$_POST;
+		//var_dump($post); exit;
+		
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			
+			// uppercase_text_where($strTable, $strColumn, $string, $op='==', $value, $encoding='UTF-8')
+			@$this->DB->uppercase_text_where(
+				$strTable,
+				$post['strfield'], 
+				$post['string'], 
+				$post['operator'], 
+				$post['value']
+			);
+			
+			$this->Msg->set_msg('You converted text to uppercase in column '.$post['strfield'].' where '.$post['string'].' '.$post['operator'].' '.$post['value']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : convert text to uppercase in column by matching condition.';
+		$this->data['placeholder'] = 'Convert text to uppercase by matching condition';
+		$this->data['columns'] = $this->actions;
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB, $strTable, 'strfield', NULL, FALSE, 'column', ' : This column will be converted to uppercase');
+		// Suppression du champ 'left' car nous n'avons plus besoin de texte à copier
+		$this->data['divstring'] = $this->Template->cdropdown($this->DB, $strTable, 'string', NULL, FALSE, 'where', ' : The field that will serve for matching condition');
+		$this->data['listoperators'] = $this->Template->dropdown($this->Sys, 'operators', 'operator', 2, NULL, FALSE);
+		$this->data['divvalue'] = $this->Template->makediv('value', 'value', ' : The value that will serve for matching condition');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/uppercase_text_where/'.$strTable;
+		$this->data['content'] = $this->Template->load('uppercase-text-where', $this->data, TRUE);
+		$this->Template->load('layout', $this->data);
+	}
+	
+	function lowercase_text_where($url)
+	{
+		$this->action_level(__FUNCTION__);
+		
+		$strTable = $url[TABLE];
+		$this->properties('left', $strTable);
+		$post = @$_POST;
+		//var_dump($post); exit;
+		
+		try
+		{
+			if(!$this->DB->table_exists($strTable))
+			{
+				header('location:'.WEBROOT.strtolower(get_class($this)));
+				exit;
+			}
+			
+			// uppercase_text_where($strTable, $strColumn, $string, $op='==', $value, $encoding='UTF-8')
+			@$this->DB->lowercase_text_where(
+				$strTable,
+				$post['strfield'], 
+				$post['string'], 
+				$post['operator'], 
+				$post['value']
+			);
+			
+			$this->Msg->set_msg('You converted text to uppercase in column '.$post['strfield'].' where '.$post['string'].' '.$post['operator'].' '.$post['value']);
+			header('Location:'.WEBROOT.strtolower(get_class($this)).'/show_table/'.$strTable);
+			exit();
+		}
+		catch (\Exception $t)
+		{
+			$this->Msg->set_msg($t->getMessage());
+		}
+		
+		$this->get_message();
+		$this->data['legend'] = 'Table '.$strTable.' : convert text to uppercase in column by matching condition.';
+		$this->data['placeholder'] = 'Convert text to uppercase by matching condition';
+		$this->data['columns'] = $this->actions;
+		$this->data['liststrfields'] = $this->Template->cdropdown($this->DB, $strTable, 'strfield', NULL, FALSE, 'column', ' : This column will be converted to lowercase');
+		// Suppression du champ 'left' car nous n'avons plus besoin de texte à copier
+		$this->data['divstring'] = $this->Template->cdropdown($this->DB, $strTable, 'string', NULL, FALSE, 'where', ' : The field that will serve for matching condition');
+		$this->data['listoperators'] = $this->Template->dropdown($this->Sys, 'operators', 'operator', 2, NULL, FALSE);
+		$this->data['divvalue'] = $this->Template->makediv('value', 'value', ' : The value that will serve for matching condition');
+
+		$this->data['table'] = $this->DB->id_table($strTable);
+		$this->data['action'] = WEBROOT.strtolower(get_class($this)).'/lowercase_text_where/'.$strTable;
+		$this->data['content'] = $this->Template->load('lowercase-text-where', $this->data, TRUE);
+		$this->Template->load('layout', $this->data);
+	}
+
+	public function send_file_to_user($sourceUser, $targetUser, $filename)
+	{
+		$srcPath = DATADIRECTORY . $sourceUser . '/' . $filename;
+		$destPath = DATADIRECTORY . $targetUser . '/' . $filename;
+
+		if (!file_exists($srcPath)) {
+			throw new \Exception("Fichier $filename introuvable pour $sourceUser");
+		}
+
+		if (!is_dir(DATADIRECTORY . $targetUser)) {
+			mkdir(DATADIRECTORY . $targetUser, 0775, true); // crée le dossier de l'autre user si nécessaire
+		}
+
+		if (!copy($srcPath, $destPath)) {
+			throw new \Exception("Erreur lors de la copie vers $targetUser");
+		}
+
+		return true;
+	}
+
+	public function testjson()
+	{
+		if (ob_get_level()) {
+			ob_end_clean();
+		}
+
+		header('Content-Type: application/json; charset=utf-8');
+		echo json_encode(['status' => 'ok', 'time' => date('c')]);
+		exit;
 	}
 }	
 ?>

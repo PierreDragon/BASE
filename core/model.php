@@ -3,15 +3,15 @@ namespace Core;
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 /**
 * @class: Model
-* @version: 9.4
+* @version: 9.5
 * @author: info@webiciel.ca
 * @php: 8
-* @review: 2024-07-13 15:43
-* @optimized function pick_where()
+* @review: 2024-06-07 11:30
+ * @changes Added move_column_after() and move_column_before() with full base-1 index support
 */
 class Model
 {
-	public static $version = '9.3';
+	public static $version = '9.5';
 	public $data = array();
 	public $datapath = null;
 	public $filename = null;
@@ -389,6 +389,114 @@ class Model
 		}
 		$this->save();
 	}  
+
+	public function move_column_after($strTable, $columnToMove, $afterColumn)
+	{
+		if (empty($strTable) || empty($columnToMove) || empty($afterColumn)) {
+			$msg = 'Switch a column after another'; 
+			if (!$this->table_exists($strTable)) {
+				$msg = 'Table '.$strTable.' has not been created yet or fields missing.'; 
+			}
+			throw new \Exception(htmlentities($msg, ENT_COMPAT, "UTF-8"));
+		}
+		$tableIndex = $this->id_table($strTable);
+
+		// Entête (ligne 0)
+		$header = $this->data[$tableIndex][0];
+		$header0 = array_values($header); // convertit en 0-based temporaire
+
+		$from = array_search($columnToMove, $header0);
+		$to   = array_search($afterColumn, $header0);
+
+		if ($from === false || $to === false || $from == $to) return;
+
+		$newPos = $to + 1;
+		if ($from < $newPos) $newPos--;
+
+		// Réorganiser l'entête
+		$col = array_splice($header0, $from, 1);
+		array_splice($header0, $newPos, 0, $col);
+
+		// Remettre en 1-based
+		$headerFixed = [];
+		foreach ($header0 as $i => $val) {
+			$headerFixed[$i + 1] = $val;
+		}
+		$this->data[$tableIndex][0] = $headerFixed;
+
+		// Réorganiser toutes les lignes de données
+		foreach ($this->data[$tableIndex] as $line => $row) {
+			if ($line === 0) continue;
+
+			$row0 = array_values($row); // 0-based temporaire
+			$val = array_splice($row0, $from, 1);
+			array_splice($row0, $newPos, 0, $val);
+
+			// Remettre en 1-based
+			$rowFixed = [];
+			foreach ($row0 as $i => $v) {
+				$rowFixed[$i + 1] = $v;
+			}
+			$this->data[$tableIndex][$line] = $rowFixed;
+		}
+		$this->save();
+	}
+
+	public function move_column_before($strTable, $columnToMove, $beforeColumn)
+	{
+		if (empty($strTable) || empty($columnToMove) || empty($beforeColumn)) {
+			$msg = 'Switch a column before another'; 
+			if (!$this->table_exists($strTable)) {
+				$msg = 'Table '.$strTable.' has not been created yet or fields missing.'; 
+			}
+			throw new \Exception(htmlentities($msg, ENT_COMPAT, "UTF-8"));
+		}
+
+		$tableIndex = $this->id_table($strTable);
+
+		// Entête (ligne 0)
+		$header = $this->data[$tableIndex][0];
+		$header0 = array_values($header); // convertit en 0-based temporaire
+
+		$from = array_search($columnToMove, $header0);
+		$to   = array_search($beforeColumn, $header0);
+
+		if ($from === false || $to === false || $from == $to) return;
+
+		$newPos = $to;
+		if ($from < $to) $newPos--; // Corriger si on tire vers la droite
+
+		// Réorganiser l'entête
+		$col = array_splice($header0, $from, 1);
+		array_splice($header0, $newPos, 0, $col);
+
+		// Re-indexer en base 1
+		$headerFixed = [];
+		foreach ($header0 as $i => $val) {
+			$headerFixed[$i + 1] = $val;
+		}
+		$this->data[$tableIndex][0] = $headerFixed;
+
+		// Réorganiser les lignes
+		foreach ($this->data[$tableIndex] as $line => $row) {
+			if ($line === 0) continue;
+
+			$row0 = array_values($row); // base 0
+			$val = array_splice($row0, $from, 1);
+			array_splice($row0, $newPos, 0, $val);
+
+			$rowFixed = [];
+			foreach ($row0 as $i => $v) {
+				$rowFixed[$i + 1] = $v;
+			}
+			$this->data[$tableIndex][$line] = $rowFixed;
+		}
+
+		$this->save();
+	}
+
+
+
 	public function column_name($table,$column)
 	{
 		$return = false;
@@ -589,7 +697,7 @@ class Model
 	public function set_cell($x,$y,$z,$value=null)
 	{
 		$this->data[$x][$y][$z] = $value;
-		$this->save();
+		return $this->save();
 	}
 	public function get_cell($x,$y,$z)
 	{
@@ -1128,10 +1236,9 @@ class Model
 		$dat = str_replace(':', '', $dat);
 		$dat = str_replace('-', '', $dat);
 		$d=($backup)? $dat:'';
-/***/
-// OLD $d=($backup)? date("Y-m-d",time()):'';
-/***/
+
 		$result = file_put_contents($this->datapath.$this->filename.$d,$puts,LOCK_EX);
+
 		if($result === false)
 		{
 			$msg = 'The file is locked.'; 
@@ -1144,6 +1251,44 @@ class Model
 		}
 		return $result;
 	}
+	/*public function save($backup = false)
+	{ 
+		$puts = '<?php' . PHP_EOL;
+
+		if (isset($this->data[0][0])) {
+			ksort($this->data[0][0], SORT_NUMERIC);
+			ksort($this->data, SORT_NUMERIC);
+
+			foreach ($this->data as $table => $t) {
+				foreach ($t as $line => $l) {
+					foreach ($l as $column => $value) {
+						$value = trim($value);
+
+						// 🔐 Encodage sûr via var_export
+						$exportedValue = var_export($value, true);
+
+						$puts .= '$data[' . $table . '][' . $line . '][' . $column . ']=' . $exportedValue . ';' . PHP_EOL;
+					}
+				}
+			}
+		}
+
+		$puts .= '?>' . PHP_EOL;
+
+		$dat = date('YmdHis'); // ex: 20250517235901
+		$d = ($backup) ? $dat : '';
+
+		$filename = $this->datapath . $this->filename . $d;
+
+		$result = file_put_contents($filename, $puts, LOCK_EX);
+
+		if ($result === false) {
+			throw new \Exception('The file is locked.');
+		}
+
+		return true;
+	}*/
+
 	public function escape(&$mixed)
 	{
 		if (is_array($mixed))
@@ -2071,47 +2216,6 @@ class Model
 		$this->save();
 	}
 
-	/*function replace_name_with_id($strTableFrom, $strColumnFrom, $strTableTo, $strColumnTo, $compare = 2) 
-	{
-		if(empty($strTableFrom) || empty($strColumnFrom))
-		{
-			$msg = 'Search a column, find and replace.'; 
-			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
-			throw new \Exception($msg);
-		}
-		
-		$FromTableIndex = $this->id_table($strTableFrom);
-		$FromColumnIndex = $this->id_column($strTableFrom, $strColumnFrom);    
-		$ToTableIndex = $this->id_table($strTableTo);    
-		$ToColumnIndex = $this->id_column($strTableTo, $strColumnTo);    
-		
-		// Créer un tableau associatif des clients (nom => id)
-		$customerMap = [];
-		for ($i = 1; isset($this->data[$FromTableIndex][$i]); $i++)
-		{
-			$customerId = $this->data[$FromTableIndex][$i][$FromColumnIndex];
-			$customerName = $this->data[$FromTableIndex][$i][$compare];
-			$customerMap[$customerName] = $customerId;
-		}
-		
-		// Parcourir la table copyprojets et remplacer le nom par l'id
-		for ($i = 1; isset($this->data[$ToTableIndex][$i]); $i++) 
-		{
-			$customerName = $this->data[$ToTableIndex][$i][$ToColumnIndex];
-			
-			// Si le nom du client existe dans la table customers, le remplacer par son ID
-			if (!empty($customerName) && isset($customerMap[$customerName]))
-			{
-				$this->data[$ToTableIndex][$i][$ToColumnIndex] = $customerMap[$customerName];
-			} 
-			else
-			{
-				// Si le client n'est pas trouvé ou que le champ est vide, garder la valeur actuelle
-				$this->data[$ToTableIndex][$i][$ToColumnIndex] = !empty($customerName) ? '0' : '';
-			}
-		}
-		$this->save();
-	}*/
 	function replace_name_with_id($strTableFrom, $strColumnFrom, $strTableTo, $strColumnTo, $compare = 2) 
 	{
 		// Vérification des paramètres de base
@@ -2196,7 +2300,7 @@ class Model
 		// S'il y a des erreurs, informer l'utilisateur mais ne pas arrêter le traitement
 		if (!empty($errors)) {
 			$errorMsg = implode("<br>", $errors);
-			$this->Msg->set_msg("Certains enregistrements n'ont pas pu être traités:<br>" . $errorMsg);
+			$errors[] = "Certains enregistrements n'ont pas pu être traités:<br>" . $errorMsg;
 		}
 		
 		// Sauvegarder les modifications
@@ -3585,6 +3689,242 @@ public function erase_text_where($strTable,$strColumn,$string,$op='==',$value=nu
 						$this->data[$table][$i][$column] = $count;
 						$count--;
 					}	
+				}
+			}
+		}
+		$this->save();
+	}
+
+	public function lowercase_text_where($strTable, $strColumn, $string, $op = '==', $value = null, $encoding = 'UTF-8')
+	{
+		if(empty($strTable) || empty($strColumn) || empty($string) || empty($op))
+		{
+			$msg = 'Convert text to lowercase in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		// FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table, $strColumn) && $this->column_exists($table, $string))
+		{
+			$column = $this->id_column($table, $strColumn);
+			$fieldwhere = $this->id_column($table, $string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		if(empty($value))
+		{
+			$value = '';
+		}
+		
+		$tab = $this->data[$table];
+		foreach($tab as $i => $rec)
+		{
+			if($i == 0) continue;
+			foreach($rec as $col => $val)
+			{
+				if($col == $fieldwhere)
+				{
+					$conditionMet = false;
+					
+					switch($op)
+					{
+						case '==':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] == $value);
+							break;
+						case '===':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] === $value);
+							break;
+						case '!=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] != $value);
+							break;
+						case '<>':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] <> $value);
+							break;
+						case '!==':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] !== $value);
+							break;
+						case '<':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] < $value);
+							break;
+						case '>':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] > $value);
+							break;
+						case '<=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] <= $value);
+							break;
+						case '>=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] >= $value);
+							break;
+						case 'BETWEEN':
+							if(str_contains($value, ',') == false)
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+								throw new \Exception($msg);
+							}
+							$test = explode(',', $value);
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1]);
+							break;
+						case 'LIST':
+							if(str_contains($value, ',') == false)
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+								throw new \Exception($msg);
+							}
+							$test = explode(',', $value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$conditionMet = true;
+									break;
+								}
+							}
+							break;
+						case 'LIKE':
+							$conditionMet = (stripos($this->data[$table][$i][$fieldwhere], $value) !== false);
+							break;
+						default:
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] == $value);
+					}
+					
+					// Si la condition est remplie, convertir le texte en majuscules
+					if($conditionMet)
+					{
+						$currentText = $this->data[$table][$i][$column];
+						// Utiliser mb_strtoupper pour gérer correctement les caractères accentués
+						$this->data[$table][$i][$column] = mb_strtolower($currentText, $encoding);
+					}
+				}
+			}
+		}
+		$this->save();
+	}
+
+	public function uppercase_text_where($strTable, $strColumn, $string, $op = '==', $value = null, $encoding = 'UTF-8')
+	{
+		if(empty($strTable) || empty($strColumn) || empty($string) || empty($op))
+		{
+			$msg = 'Convert text to lowercase in a column provided it respects the key'; 
+			if(!$this->table_exists($strTable) && !empty($strColumn))
+			{
+				$msg = 'Table '.$strTable.' has not been imported yet.'; 
+			}
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		// FROM TABLE
+		$table = $this->id_table($strTable);
+		if($this->column_exists($table, $strColumn) && $this->column_exists($table, $string))
+		{
+			$column = $this->id_column($table, $strColumn);
+			$fieldwhere = $this->id_column($table, $string);
+		}
+		else
+		{
+			$msg = 'The column '.$strColumn.' or '.$string.' does not exists or are misspell.'; 
+			$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+			throw new \Exception($msg);
+		}
+		
+		if(empty($value))
+		{
+			$value = '';
+		}
+		
+		$tab = $this->data[$table];
+		foreach($tab as $i => $rec)
+		{
+			if($i == 0) continue;
+			foreach($rec as $col => $val)
+			{
+				if($col == $fieldwhere)
+				{
+					$conditionMet = false;
+					
+					switch($op)
+					{
+						case '==':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] == $value);
+							break;
+						case '===':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] === $value);
+							break;
+						case '!=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] != $value);
+							break;
+						case '<>':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] <> $value);
+							break;
+						case '!==':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] !== $value);
+							break;
+						case '<':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] < $value);
+							break;
+						case '>':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] > $value);
+							break;
+						case '<=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] <= $value);
+							break;
+						case '>=':
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] >= $value);
+							break;
+						case 'BETWEEN':
+							if(str_contains($value, ',') == false)
+							{
+								$msg = 'When the operator is BETWEEN the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+								throw new \Exception($msg);
+							}
+							$test = explode(',', $value);
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] >= $test[0] && $this->data[$table][$i][$fieldwhere] <= $test[1]);
+							break;
+						case 'LIST':
+							if(str_contains($value, ',') == false)
+							{
+								$msg = 'When the operator is LIST the values provided must be separated by a comma.'; 
+								$msg = htmlentities($msg, ENT_COMPAT, "UTF-8");
+								throw new \Exception($msg);
+							}
+							$test = explode(',', $value);
+							foreach($test as $tes)
+							{
+								if($this->data[$table][$i][$fieldwhere] == $tes)
+								{
+									$conditionMet = true;
+									break;
+								}
+							}
+							break;
+						case 'LIKE':
+							$conditionMet = (stripos($this->data[$table][$i][$fieldwhere], $value) !== false);
+							break;
+						default:
+							$conditionMet = ($this->data[$table][$i][$fieldwhere] == $value);
+					}
+					
+					// Si la condition est remplie, convertir le texte en majuscules
+					if($conditionMet)
+					{
+						$currentText = $this->data[$table][$i][$column];
+						// Utiliser mb_strtoupper pour gérer correctement les caractères accentués
+						$this->data[$table][$i][$column] = mb_strtoupper($currentText, $encoding);
+					}
 				}
 			}
 		}

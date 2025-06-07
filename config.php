@@ -7,25 +7,36 @@ set_time_limit(60); //seconds
 date_default_timezone_set('America/New_York'); 
 
 define('VERSION','2.1');
-define('ROOT',__DIR__.DIRECTORY_SEPARATOR);
-// Ensure the current directory is pointing to the front controller's directory
+define('ROOT', __DIR__ . DIRECTORY_SEPARATOR);
 chdir(ROOT);
+
 define('DEFAULTCONTROLLER','main');
 define('DEFAULTDATABASE','data');
-define('CLASSDIRECTORY',ROOT.'classes/');
-define('DATADIRECTORY',ROOT.'data/');
-define('VIEWDIRECTORY',ROOT.'views/');
-define('WEBROOT',str_replace('index.php','',$_SERVER['SCRIPT_NAME']));
-define('ASSETDIRECTORY',WEBROOT.'assets/');
-define('CONTROLLER',0);
-define('ACTION',1);
-define('PRIMARY',1);
-define('TABLE',2);
-define('LINE',2);
-define('FIELD',3);
-define('INDEX',3);
-define('VALUE',4);
 
-require(ROOT.'core/model.php');
-require(ROOT.'core/controller.php');
+define('CLASSDIRECTORY', realpath(ROOT . 'classes') . DIRECTORY_SEPARATOR);
+define('DATADIRECTORY', realpath(ROOT . 'data') . DIRECTORY_SEPARATOR);
+define('VIEWDIRECTORY', realpath(ROOT . 'views') . DIRECTORY_SEPARATOR);
+
+define('WEBROOT', str_replace('index.php', '', $_SERVER['SCRIPT_NAME']));
+define('ASSETDIRECTORY', WEBROOT . 'assets/');
+
+define('CONTROLLER', 0);
+define('ACTION', 1);
+define('PRIMARY', 1);
+define('TABLE', 2);
+define('LINE', 2);
+define('FIELD', 3);
+define('INDEX', 3);
+define('VALUE', 4);
+
+// Vérifie que les répertoires critiques existent
+foreach (['CLASSDIRECTORY', 'DATADIRECTORY', 'VIEWDIRECTORY'] as $dirConst) {
+    if (!is_dir(constant($dirConst))) {
+        die("⚠️ Erreur : le dossier " . constant($dirConst) . " est introuvable.");
+    }
+}
+
+require(ROOT . 'core/model.php');
+require(ROOT . 'core/controller.php');
+
 ?>

@@ -75,11 +75,11 @@ class DB extends Core\Model
 			$msg = 'You tried to load a table that does not have a key table. Try to import the original table before loading a big file that is attached to it.';
 			$msg = htmlentities($msg,ENT_COMPAT,"UTF-8");
 			throw new  \Exception($msg);
-			exit;
 		}
 		if(file_exists($this->datapath.$strTable.'.php')) 
 		{
 			include($this->datapath.$strTable.'.php');
+			
 			$firstKey = array_key_first($data);
 			if($firstKey !== $table)
 			{
@@ -424,6 +424,10 @@ class DB extends Core\Model
 			file_put_contents(DATADIRECTORY.$strTable.'.js',$puts,LOCK_EX);	
 		}
 		$_SESSION['jsfile'] = $strTable.'.js';
+	}
+
+	private function is_false($value) {
+		return is_string($value) && strtolower($value) === "false";
 	}
 }
 ?>

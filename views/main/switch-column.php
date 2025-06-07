@@ -1,4 +1,4 @@
-<form name="frmCopyTextWhere" action="<?php echo $action; ?>" method="post">
+<form name="frmSwitchColumn" action="<?php echo $action; ?>" method="post">
 	<legend><?php echo $legend ?></legend>
 			<?php  
 			foreach($columns as $id=>$colonne)

@@ -1,4 +1,5 @@
 <?php if ( ! defined('ROOT')) exit('No direct script access allowed');
+require_once(ROOT . 'classes/usertoken.php'); // ✅ nécessaire pour générer le token
 /**
 * @class: Login
 * @version: 7.3 
@@ -28,6 +29,7 @@ class Login extends Core\Controller
 				$colUser = $this->Sys->id_column($idTable,'username');
 				$colJumbo = $this->Sys->id_column($idTable,'jumbo');
 				$colLevel = $this->Sys->id_column($idTable,'level');
+				$colKey = $this->Sys->id_column($idTable,'key');
 				
 				if($user[$colPass] == trim(md5($post['password'])) && $user[$colUser] == trim($post['username']))
 				{
@@ -39,6 +41,7 @@ class Login extends Core\Controller
 					$post['username'] = $user[$colUser];
 					$post['jumbo'] = $user[$colJumbo];
 					$post['level'] = $user[$colLevel];
+					$post['key'] = $user[$colKey];
 
 					$this->Sys->set_line($post);
 					$_SESSION = $post;
@@ -92,53 +95,56 @@ class Login extends Core\Controller
 		header('Location:'.WEBROOT.strtolower(get_class($this)));
 	}
 	
-	function create()
+	public function create()
 	{
-		try
-		{
+		try {
 			$post = @$_POST;
-			
+
 			$idTable = $this->Sys->id_table('users');
-			//$post['loggedin'] = TRUE;
-			$post['table'] = $idTable;
-			//var_dump($_POST); exit;
-			if(empty($post['username']) || empty($post['password']))
-			{
-				$this->Msg->set_msg('Please provide a base name and a password!  | <a href="/login">Login</a>');
-				//header('Location:'.WEBROOT.strtolower(get_class($this).'/create'));	
-				$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
-				$this->Template->load('login-create',$this->data);
+
+			if (empty($post['username']) || empty($post['password'])) {
+				$this->Msg->set_msg('Please provide a base name and a password! | <a href="/login">Login</a>');
+				$this->data['action'] = WEBROOT . strtolower(get_class($this) . '/create');
+				$this->Template->load('login-create', $this->data);
 				exit;
 			}
-			elseif(file_exists(DATADIRECTORY.$post['username'].'.php'))
-			{
-				$this->Msg->set_msg('<strong style="color:tomato">This base already exists ! Choose another name.</strong> | <a href="/login">Login</a>');
-				/*$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
-				$this->Template->load('login-create',$this->data);*/
-				header('Location:'.WEBROOT.strtolower(get_class($this).'/create'));	
+			elseif (file_exists(DATADIRECTORY . $post['username'] . '.php')) {
+				$this->Msg->set_msg('<strong style="color:tomato">This base already exists! Choose another name.</strong> | <a href="/login">Login</a>');
+				header('Location:' . WEBROOT . strtolower(get_class($this) . '/create'));
 				exit;
 			}
-			//SANITIZE
+
+			// SANITIZE
 			$post['username'] = strip_tags($post['username']);
-			$post['password'] = strip_tags($post['password']);
-			$post['password'] = trim(md5($post['password']));
-			$post['jumbo'] = 1;
-			$post['level'] = 3;
-			//var_dump($post); exit;
-			$this->Sys->add_line($post,'id_user');
+			$post['password'] = trim(md5(strip_tags($post['password'])));
+			$post['jumbo']   = 1;
+			$post['level']   = 3;
+
+			// 🔐 Génère et stocke la clé
+			$keyObj       = new UserToken($post['username'], $this->generate_key());
+			$post['key']  = $keyObj->get_key(); // retourne clé alpha
+			$token        = $keyObj->generate_token(); // retourne token numérique
+
+			// Enregistrement dans la table "users"
+			$this->Sys->add_line($post, 'id_user');
+
+			// Connexion auto
 			$_SESSION = $post;
-				
-			$this->Msg->set_msg('Congratulation ! You have created your base! <strong>'.$post['username']. '</strong> | <a href="/login">Login</a>');
-			$controller = (file_exists(ROOT.'controllers/'.$post['username'].'.php'))?$post['username']:DEFAULTCONTROLLER;
-			header('Location:'.WEBROOT.$controller);						
+
+			// 🎉 Message de confirmation avec token numérique
+			$this->Msg->set_msg("🎉 Base <strong>{$post['username']}</strong> créée !<br>Votre clé d’accès API : <code>{$token}</code><br><a href='/login'>Login</a>");
+
+			// Redirection vers contrôleur
+			$controller = (file_exists(ROOT . 'controllers/' . $post['username'] . '.php')) ? $post['username'] : DEFAULTCONTROLLER;
+			header('Location:' . WEBROOT . $controller);
 			exit;
 		}
-		catch(Exception $e)
-		{
+		catch (Exception $e) {
 			$this->Msg->set_msg($e->getMessage());
-			$this->data['action'] = WEBROOT.strtolower(get_class($this).'/create');
-			$this->Template->load('login-create',$this->data);
+			$this->data['action'] = WEBROOT . strtolower(get_class($this) . '/create');
+			$this->Template->load('login-create', $this->data);
 		}
 	}
+
 }
 ?>

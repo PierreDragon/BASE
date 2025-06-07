@@ -11,6 +11,7 @@
 			<li>Max number of columns : <?php echo $maxcols; ?></li>
 			<li>Show limit default: <?php echo $showlimitdefault; ?> per page</li>
 			<li>Offset default: <?php echo $offsetdefault;  ?></li>
+			<li>PHP version: <?php echo phpversion();?></li>
 		  <ul>
 	  </div>
 </div>

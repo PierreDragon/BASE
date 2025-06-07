@@ -229,7 +229,7 @@ class System extends Core\Controller
 	
 	function delete_record($url)
 	{
-		if(($url[TABLE]=='configs' || $url[TABLE]=='users' || $url[TABLE]=='tables' || $url[TABLE]=='operators' || $url[TABLE]=='scripts' || $url[TABLE]=='files' || $url[TABLE]=='maths' ) && $_SESSION['id_user'] !== "1" )
+		if(($url[TABLE]=='configs' || $url[TABLE]=='users' || $url[TABLE]=='tables' || $url[TABLE]=='operators' || $url[TABLE]=='scripts' || $url[TABLE]=='files' || $url[TABLE]=='maths' ) && $_SESSION['level'] !== "1" )
 		{
 			$this->denied('delete a record');
 		}
